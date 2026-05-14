@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Cambio de Turno con Compañero</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:sans-serif;font-size:13px;color:#111;background:#f5f5f5;}
+.wrap{max-width:540px;margin:2rem auto;background:#fff;border-radius:12px;padding:2rem;box-shadow:0 2px 16px rgba(0,0,0,.08);}
+label{display:block;font-size:12px;color:#555;margin-bottom:4px;}
+input[type=text],input[type=date],input[type=password],select{width:100%;padding:8px 10px;border:1px solid #ccc;border-radius:6px;font-size:13px;outline:none;}
+.btn{padding:8px 22px;background:#111;color:#fff;border:none;border-radius:6px;cursor:pointer;font-size:13px;}
+.btn-sec{padding:8px 18px;background:#fff;color:#111;border:1px solid #ccc;border-radius:6px;cursor:pointer;font-size:13px;}
+.errbox{margin-top:4px;padding:6px 10px;background:#fef2f2;border:1px solid #fca5a5;border-radius:6px;font-size:12px;color:#b91c1c;}
+.field{margin-bottom:.9rem;}
+.row{display:flex;justify-content:space-between;gap:8px;margin-top:1.25rem;}
+.dia-card{border:1px solid #e5e7eb;border-radius:8px;overflow:hidden;margin-bottom:.6rem;}
+.dia-title{background:#f9fafb;padding:9px 14px;border-bottom:1px solid #e5e7eb;font-weight:600;font-size:13px;}
+.dia-body{padding:12px 14px;display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;}
+.total-box{margin-top:.75rem;padding:10px 14px;background:#f0f9ff;border:1px solid #bae6fd;border-radius:8px;display:flex;justify-content:space-between;align-items:center;}
+.hrs-err{display:none;margin-top:.75rem;padding:10px 14px;background:#fef2f2;border:1px solid #fca5a5;border-radius:8px;font-size:13px;color:#b91c1c;font-weight:500;text-align:center;}
+.step{display:none;}
+.step.active{display:block;}
+h2{font-size:15px;font-weight:600;margin-bottom:4px;}
+.subtitle{font-size:12px;color:#666;margin-bottom:1.25rem;}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div style="text-align:center;margin-bottom:1.5rem;">
+    <p style="font-size:11px;letter-spacing:2px;color:#888;text-transform:uppercase;margin-bottom:4px;">Recursos Humanos</p>
+    <h1 style="font-size:18px;font-weight:800;letter-spacing:.5px;">CAMBIO DE TURNO CON COMPAÑERO</h1>
+    <div style="width:40px;height:3px;background:#111;border-radius:2px;margin:8px auto 0;"></div>
+  </div>
+
+  <!-- PASO 1 -->
+  <div id="s1" class="step active">
+    <h2>Tus datos</h2><p class="subtitle">Paso 1 de 4 — Identificación del solicitante</p>
+    <div class="field"><label>Apellidos</label><input type="text" id="ap" placeholder="Primer y segundo apellido"/><div class="errbox" id="e_ap" style="display:none;"></div></div>
+    <div class="field"><label>Nombre</label><input type="text" id="nom" placeholder="Nombre completo"/><div class="errbox" id="e_nom" style="display:none;"></div></div>
+    <div class="field"><label>Número de empleado</label><input type="text" id="num" placeholder="Ej: 55526" oninput="chkN('num','e_num','col','e_col')"/><div class="errbox" id="e_num" style="display:none;"></div></div>
+    <div class="field"><label>Colectivo</label>
+      <select id="col" onchange="chkC('num','col','e_col')">
+        <option value="">Selecciona tu colectivo</option>
+        <option value="ESTRUCTURAL">Estructural</option>
+        <option value="CUARTO TURNO">Cuarto turno</option>
+        <option value="QUINTO TURNO">Quinto turno</option>
+        <option value="FIJO DISCONTINUO">Fijo discontinuo</option>
+      </select><div class="errbox" id="e_col" style="display:none;"></div>
+    </div>
+    <div class="row"><span></span><button class="btn" onclick="goS2()">Continuar ↗</button></div>
+  </div>
+
+  <!-- PASO 2 -->
+  <div id="s2" class="step">
+    <h2>Datos del compañero</h2><p class="subtitle">Paso 2 de 4 — Identificación del compañero</p>
+    <div class="field"><label>Apellidos</label><input type="text" id="cap" placeholder="Primer y segundo apellido"/><div class="errbox" id="e_cap" style="display:none;"></div></div>
+    <div class="field"><label>Nombre</label><input type="text" id="cnom" placeholder="Nombre completo"/><div class="errbox" id="e_cnom" style="display:none;"></div></div>
+    <div class="field"><label>Número de empleado</label><input type="text" id="cnum" placeholder="Ej: 55526" oninput="chkN('cnum','e_cnum','ccol','e_ccol')"/><div class="errbox" id="e_cnum" style="display:none;"></div></div>
+    <div class="field"><label>Colectivo</label>
+      <select id="ccol" onchange="chkC('cnum','ccol','e_ccol')">
+        <option value="">Selecciona el colectivo del compañero</option>
+        <option value="ESTRUCTURAL">Estructural</option>
+        <option value="CUARTO TURNO">Cuarto turno</option>
+        <option value="QUINTO TURNO">Quinto turno</option>
+        <option value="FIJO DISCONTINUO">Fijo discontinuo</option>
+      </select><div class="errbox" id="e_ccol" style="display:none;"></div>
+    </div>
+    <div class="row"><button class="btn-sec" onclick="go(1)">← Volver</button><button class="btn" onclick="goS3()">Continuar ↗</button></div>
+  </div>
+
+  <!-- PASO 3 -->
+  <div id="s3" class="step">
+    <h2>Tu horario planificado</h2><p class="subtitle">Paso 3 de 4 — Indica los días y horario que tenías planificados</p>
+    <div class="errbox" id="e_plan" style="display:none;margin-bottom:.75rem;"></div>
+    <div id="dc_p"></div>
+    <div class="total-box"><span style="color:#0369a1;">Total horas planificadas:</span><span id="tot_p" style="font-size:14px;font-weight:700;color:#0369a1;">0h</span></div>
+    <div class="row"><button class="btn-sec" onclick="go(2)">← Volver</button><button class="btn" onclick="goS4()">Continuar ↗</button></div>
+  </div>
+
+  <!-- PASO 4 -->
+  <div id="s4" class="step">
+    <h2>Tu horario solicitado</h2><p class="subtitle">Paso 4 de 4 — Indica los días y horario que quieres realizar</p>
+    <div class="errbox" id="e_sol" style="display:none;margin-bottom:.75rem;"></div>
+    <div id="dc_s"></div>
+    <div class="total-box"><span style="color:#0369a1;">Total horas solicitadas:</span><span id="tot_s" style="font-size:14px;font-weight:700;color:#0369a1;">0h</span></div>
+    <div class="hrs-err" id="hrs_err"></div>
+    <div id="hrs_descanso" style="display:none;margin-top:.75rem;padding:12px 14px;background:#fffbeb;border:1px solid #fcd34d;border-radius:8px;font-size:13px;color:#92400e;">
+      <p style="font-weight:600;margin-bottom:10px;">⚠ Hay una diferencia entre las horas planificadas y las solicitadas, ¿se debe al descanso de 45 minutos en tu semana?</p>
+      <div style="display:flex;gap:10px;">
+        <button onclick="respDescanso(true)" id="btn_si" style="flex:1;padding:8px;background:#15803d;color:#fff;border:none;border-radius:6px;cursor:pointer;font-size:13px;font-weight:600;">✓ Sí</button>
+        <button onclick="respDescanso(false)" id="btn_no" style="flex:1;padding:8px;background:#b91c1c;color:#fff;border:none;border-radius:6px;cursor:pointer;font-size:13px;font-weight:600;">✗ No</button>
+      </div>
+      <p id="descanso_no_msg" style="display:none;margin-top:8px;font-size:12px;color:#b91c1c;font-weight:500;">Revisa las horas antes de enviar la solicitud.</p>
+    </div>
+    <div class="row"><button class="btn-sec" onclick="go(3)">← Volver</button><button class="btn" onclick="enviar()">Enviar solicitud ↗</button></div>
+  </div>
+
+  <!-- RESUMEN -->
+  <div id="s5" class="step">
+    <div style="background:#111;color:#fff;border-radius:10px;padding:1rem 1.25rem;margin-bottom:.6rem;display:flex;align-items:center;gap:14px;">
+      <div style="width:38px;height:38px;border-radius:50%;background:#333;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#aaa" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+      </div>
+      <div><p style="font-size:10px;color:#aaa;letter-spacing:1px;text-transform:uppercase;margin-bottom:2px;">Solicitante</p><p id="r_nom" style="font-weight:700;font-size:14px;"></p><p id="r_num" style="font-size:12px;color:#aaa;"></p></div>
+    </div>
+    <div style="background:#374151;color:#fff;border-radius:10px;padding:1rem 1.25rem;margin-bottom:1rem;display:flex;align-items:center;gap:14px;">
+      <div style="width:38px;height:38px;border-radius:50%;background:#4b5563;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#9ca3af" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+      </div>
+      <div><p style="font-size:10px;color:#9ca3af;letter-spacing:1px;text-transform:uppercase;margin-bottom:2px;">Compañero</p><p id="r_cnom" style="font-weight:700;font-size:14px;"></p><p id="r_cnum" style="font-size:12px;color:#9ca3af;"></p></div>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:1rem;">
+      <div style="border:1px solid #e5e7eb;border-radius:8px;overflow:hidden;">
+        <div style="background:#f0f9ff;padding:8px 12px;border-bottom:1px solid #bae6fd;font-size:12px;font-weight:700;color:#0369a1;">📅 Planificado</div>
+        <div id="r_plan" style="padding:10px 12px;display:flex;flex-direction:column;gap:6px;"></div>
+        <div style="background:#f0f9ff;padding:6px 12px;border-top:1px solid #bae6fd;display:flex;justify-content:space-between;"><span style="font-size:11px;color:#0369a1;">Total</span><span id="r_tot_p" style="font-size:12px;font-weight:700;color:#0369a1;"></span></div>
+      </div>
+      <div style="border:1px solid #e5e7eb;border-radius:8px;overflow:hidden;">
+        <div style="background:#f0fdf4;padding:8px 12px;border-bottom:1px solid #86efac;font-size:12px;font-weight:700;color:#15803d;">✅ Solicitado</div>
+        <div id="r_sol" style="padding:10px 12px;display:flex;flex-direction:column;gap:6px;"></div>
+        <div style="background:#f0fdf4;padding:6px 12px;border-top:1px solid #86efac;display:flex;justify-content:space-between;"><span style="font-size:11px;color:#15803d;">Total</span><span id="r_tot_s" style="font-size:12px;font-weight:700;color:#15803d;"></span></div>
+      </div>
+    </div>
+    <div style="background:#f0fdf4;border:1px solid #86efac;border-radius:10px;padding:1.25rem;text-align:center;">
+      <p style="font-weight:700;font-size:14px;color:#15803d;margin-bottom:4px;">Solicitud enviada correctamente</p>
+      <p id="r_fechahora" style="font-size:11px;color:#15803d;margin-bottom:8px;"></p>
+      <p style="font-size:12px;color:#166534;line-height:1.7;">En unos días verás reflejado en tu calendario el cambio.<br>Si en <strong>15 días</strong> no lo ves actualizado, consulta con <strong>Recursos Humanos</strong>.</p>
+    </div>
+    <div style="text-align:center;margin-top:1.25rem;">
+      <button class="btn" onclick="nuevaSolicitud()">+ Solicitar un nuevo cambio</button>
+    </div>
+  </div>
+
+  <div style="margin-top:2rem;padding-top:1.25rem;border-top:1px solid #e5e7eb;text-align:center;">
+    <img src="logo.png" alt="Plataforma Europa" style="height:28px;"/>
+  </div>
+</div>
+
+<button onclick="toggleLogin()" style="position:fixed;bottom:20px;right:20px;background:#111;color:#fff;border:none;border-radius:8px;cursor:pointer;font-size:13px;padding:10px 18px;font-weight:500;box-shadow:0 2px 8px rgba(0,0,0,.25);z-index:9000;">⚙ Admin</button>
+
+<div id="loginBox" style="display:none;position:fixed;bottom:68px;right:20px;width:280px;padding:1.25rem;background:#fff;border:1px solid #e5e7eb;border-radius:10px;box-shadow:0 4px 16px rgba(0,0,0,.15);z-index:9001;">
+  <p style="font-size:14px;font-weight:600;margin-bottom:10px;">Acceso administrador</p>
+  <div style="display:flex;gap:8px;">
+    <input type="password" id="adminPass" placeholder="Contraseña" style="flex:1;padding:8px 10px;border:1px solid #ccc;border-radius:6px;font-size:13px;" onkeydown="if(event.key==='Enter')loginAdmin()"/>
+    <button onclick="loginAdmin()" style="padding:8px 14px;background:#111;color:#fff;border:none;border-radius:6px;cursor:pointer;font-size:13px;">Entrar</button>
+  </div>
+  <div id="loginErr" style="display:none;margin-top:8px;font-size:12px;color:#b91c1c;">⚠ Contraseña incorrecta</div>
+</div>
+
+<!-- Firebase SDK -->
+<script type="module">
+import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
+import { getFirestore, collection, addDoc, getDocs, deleteDoc, doc } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
+
+const firebaseConfig = {
+  apiKey: "AIzaSyChbA9kROGGHC_I8QKCm2tTk0u80P__lwA",
+  authDomain: "cambio-de-turno-5db41.firebaseapp.com",
+  projectId: "cambio-de-turno-5db41",
+  storageBucket: "cambio-de-turno-5db41.firebasestorage.app",
+  messagingSenderId: "991134522088",
+  appId: "1:991134522088:web:ef27aa483b8f6b0209075d"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+
+window._fbSave = async function(sol) {
+  try {
+    await addDoc(collection(db, 'solicitudes'), sol);
+    return true;
+  } catch(e) {
+    console.error('Error guardando en Firebase:', e);
+    return false;
+  }
+};
+
+window._fbLoad = async function() {
+  try {
+    const snap = await getDocs(collection(db, 'solicitudes'));
+    return snap.docs.map(d => ({ ...d.data(), _id: d.id }));
+  } catch(e) {
+    console.error('Error cargando de Firebase:', e);
+    return [];
+  }
+};
+
+window._fbDeleteAll = async function() {
+  try {
+    const snap = await getDocs(collection(db, 'solicitudes'));
+    for (const d of snap.docs) await deleteDoc(doc(db, 'solicitudes', d.id));
+    return true;
+  } catch(e) {
+    console.error('Error borrando:', e);
+    return false;
+  }
+};
+</script>
+
+<script>
+const DIAS=5, ADMIN_PASS='RRHH2026';
+var descansoRespuesta=null;
+
+const DB={"55526":"ESTRUCTURAL","72014":"ESTRUCTURAL","222919":"ESTRUCTURAL","76447":"ESTRUCTURAL","81360":"ESTRUCTURAL","81420":"ESTRUCTURAL","84023":"ESTRUCTURAL","121572":"ESTRUCTURAL","125019":"ESTRUCTURAL","178816":"ESTRUCTURAL","54817":"ESTRUCTURAL","55207":"ESTRUCTURAL","55774":"ESTRUCTURAL","73696":"ESTRUCTURAL","78986":"ESTRUCTURAL","105603":"ESTRUCTURAL","150320":"ESTRUCTURAL","173521":"ESTRUCTURAL","174369":"ESTRUCTURAL","55515":"ESTRUCTURAL","64485":"ESTRUCTURAL","74717":"ESTRUCTURAL","76461":"ESTRUCTURAL","85074":"ESTRUCTURAL","105951":"ESTRUCTURAL","106764":"ESTRUCTURAL","124501":"ESTRUCTURAL","127267":"ESTRUCTURAL","149157":"ESTRUCTURAL","55505":"ESTRUCTURAL","165576":"ESTRUCTURAL","64717":"ESTRUCTURAL","113377":"ESTRUCTURAL","126528":"ESTRUCTURAL","129867":"ESTRUCTURAL","130116":"ESTRUCTURAL","150322":"ESTRUCTURAL","39225":"ESTRUCTURAL","178784":"ESTRUCTURAL","74885":"ESTRUCTURAL","243173":"ESTRUCTURAL","85712":"ESTRUCTURAL","117631":"ESTRUCTURAL","121576":"ESTRUCTURAL","131706":"ESTRUCTURAL","81836":"ESTRUCTURAL","84307":"ESTRUCTURAL","108800":"ESTRUCTURAL","254201":"ESTRUCTURAL","173525":"ESTRUCTURAL","176907":"ESTRUCTURAL","229561":"ESTRUCTURAL","231702":"ESTRUCTURAL","253678":"ESTRUCTURAL","150666":"ESTRUCTURAL","267218":"ESTRUCTURAL","267845":"ESTRUCTURAL","164728":"ESTRUCTURAL","228977":"ESTRUCTURAL","114447":"ESTRUCTURAL","117618":"ESTRUCTURAL","254608":"ESTRUCTURAL","149084":"ESTRUCTURAL","230116":"ESTRUCTURAL","254304":"ESTRUCTURAL","260231":"ESTRUCTURAL","275263":"ESTRUCTURAL","292088":"ESTRUCTURAL","209541":"ESTRUCTURAL","260487":"ESTRUCTURAL","260497":"ESTRUCTURAL","286102":"ESTRUCTURAL","241254":"ESTRUCTURAL","241298":"ESTRUCTURAL","254241":"ESTRUCTURAL","267136":"ESTRUCTURAL","286107":"ESTRUCTURAL","173522":"ESTRUCTURAL","72504":"ESTRUCTURAL","254200":"ESTRUCTURAL","254237":"ESTRUCTURAL","260501":"ESTRUCTURAL","276155":"ESTRUCTURAL","286667":"ESTRUCTURAL","286784":"ESTRUCTURAL","229929":"ESTRUCTURAL","260499":"ESTRUCTURAL","267138":"ESTRUCTURAL","164060":"ESTRUCTURAL","241976":"ESTRUCTURAL","130241":"ESTRUCTURAL","254205":"ESTRUCTURAL","307711":"ESTRUCTURAL","308082":"ESTRUCTURAL","214538":"ESTRUCTURAL","244018":"ESTRUCTURAL","307762":"ESTRUCTURAL","169509":"ESTRUCTURAL","237016":"ESTRUCTURAL","241256":"ESTRUCTURAL","241945":"ESTRUCTURAL","105585":"ESTRUCTURAL","146859":"ESTRUCTURAL","125309":"ESTRUCTURAL","83088":"ESTRUCTURAL","125853":"ESTRUCTURAL","92034":"ESTRUCTURAL","120751":"ESTRUCTURAL","106412":"ESTRUCTURAL","65189":"ESTRUCTURAL","267573":"ESTRUCTURAL","241266":"ESTRUCTURAL","55488":"ESTRUCTURAL","218258":"ESTRUCTURAL","241962":"ESTRUCTURAL","243172":"ESTRUCTURAL","123977":"ESTRUCTURAL","180418":"ESTRUCTURAL","254573":"ESTRUCTURAL","118648":"ESTRUCTURAL","231441":"ESTRUCTURAL","146819":"ESTRUCTURAL","223568":"ESTRUCTURAL","230525":"ESTRUCTURAL","134323":"ESTRUCTURAL","174374":"ESTRUCTURAL","209544":"ESTRUCTURAL","66200":"ESTRUCTURAL","237020":"ESTRUCTURAL","241245":"ESTRUCTURAL","150310":"ESTRUCTURAL","228912":"ESTRUCTURAL","229581":"ESTRUCTURAL","241303":"ESTRUCTURAL","106769":"ESTRUCTURAL","106717":"ESTRUCTURAL","174364":"ESTRUCTURAL","183389":"ESTRUCTURAL","58953":"ESTRUCTURAL","230120":"ESTRUCTURAL","230370":"ESTRUCTURAL","241295":"ESTRUCTURAL","241974":"ESTRUCTURAL","275228":"ESTRUCTURAL","275261":"ESTRUCTURAL","241260":"ESTRUCTURAL","129214":"ESTRUCTURAL","267724":"ESTRUCTURAL","165571":"ESTRUCTURAL","173531":"ESTRUCTURAL","209914":"ESTRUCTURAL","254234":"ESTRUCTURAL","254660":"ESTRUCTURAL","285001":"ESTRUCTURAL","285495":"ESTRUCTURAL","214382":"ESTRUCTURAL","260294":"ESTRUCTURAL","267030":"ESTRUCTURAL","267044":"ESTRUCTURAL","284964":"ESTRUCTURAL","286158":"CUARTO TURNO","286173":"CUARTO TURNO","292072":"CUARTO TURNO","306274":"CUARTO TURNO","306305":"CUARTO TURNO","306618":"CUARTO TURNO","286692":"CUARTO TURNO","306220":"CUARTO TURNO","306225":"CUARTO TURNO","374324":"CUARTO TURNO","374521":"CUARTO TURNO","399743":"CUARTO TURNO","400302":"CUARTO TURNO","286737":"CUARTO TURNO","307901":"CUARTO TURNO","330021":"CUARTO TURNO","330179":"CUARTO TURNO","374446":"CUARTO TURNO","374467":"CUARTO TURNO","285022":"CUARTO TURNO","306279":"CUARTO TURNO","306313":"CUARTO TURNO","308165":"CUARTO TURNO","330779":"CUARTO TURNO","330847":"CUARTO TURNO","306233":"CUARTO TURNO","306308":"CUARTO TURNO","317104":"CUARTO TURNO","330998":"CUARTO TURNO","399746":"CUARTO TURNO","292089":"CUARTO TURNO","306242":"CUARTO TURNO","307893":"CUARTO TURNO","324422":"CUARTO TURNO","324431":"CUARTO TURNO","330797":"CUARTO TURNO","354221":"CUARTO TURNO","356628":"CUARTO TURNO","292094":"CUARTO TURNO","306252":"CUARTO TURNO","324416":"CUARTO TURNO","324424":"CUARTO TURNO","330193":"CUARTO TURNO","354768":"CUARTO TURNO","286136":"CUARTO TURNO","291780":"CUARTO TURNO","306246":"CUARTO TURNO","306343":"CUARTO TURNO","307748":"CUARTO TURNO","291781":"CUARTO TURNO","292095":"CUARTO TURNO","292108":"CUARTO TURNO","306235":"CUARTO TURNO","306277":"CUARTO TURNO","306749":"CUARTO TURNO","357321":"CUARTO TURNO","267434":"CUARTO TURNO","292070":"CUARTO TURNO","306276":"CUARTO TURNO","306748":"CUARTO TURNO","324319":"CUARTO TURNO","324418":"CUARTO TURNO","285531":"CUARTO TURNO","306597":"CUARTO TURNO","307763":"CUARTO TURNO","308163":"CUARTO TURNO","324356":"CUARTO TURNO","357323":"CUARTO TURNO","307766":"CUARTO TURNO","307892":"CUARTO TURNO","308170":"CUARTO TURNO","330795":"CUARTO TURNO","356640":"CUARTO TURNO","134173":"CUARTO TURNO","275223":"CUARTO TURNO","306275":"CUARTO TURNO","306623":"CUARTO TURNO","307761":"CUARTO TURNO","308276":"CUARTO TURNO","334613":"CUARTO TURNO","339794":"CUARTO TURNO","354042":"CUARTO TURNO","307765":"CUARTO TURNO","308155":"CUARTO TURNO","356743":"CUARTO TURNO","379728":"CUARTO TURNO","395866":"CUARTO TURNO","296909":"CUARTO TURNO","306596":"CUARTO TURNO","308154":"CUARTO TURNO","334756":"CUARTO TURNO","344760":"CUARTO TURNO","267571":"CUARTO TURNO","291754":"CUARTO TURNO","324354":"CUARTO TURNO","334632":"CUARTO TURNO","438397":"CUARTO TURNO","291759":"CUARTO TURNO","306730":"CUARTO TURNO","307644":"CUARTO TURNO","330355":"CUARTO TURNO","334607":"CUARTO TURNO","334751":"CUARTO TURNO","354731":"CUARTO TURNO","291758":"CUARTO TURNO","292083":"CUARTO TURNO","295090":"CUARTO TURNO","307643":"CUARTO TURNO","308159":"CUARTO TURNO","324408":"CUARTO TURNO","267310":"CUARTO TURNO","307646":"CUARTO TURNO","308158":"CUARTO TURNO","330457":"CUARTO TURNO","330781":"CUARTO TURNO","395852":"CUARTO TURNO","308157":"CUARTO TURNO","324409":"CUARTO TURNO","330765":"CUARTO TURNO","357325":"CUARTO TURNO","375884":"CUARTO TURNO","334627":"CUARTO TURNO","306595":"CUARTO TURNO","306598":"CUARTO TURNO","307647":"CUARTO TURNO","334753":"CUARTO TURNO","267103":"CUARTO TURNO","267877":"CUARTO TURNO","260251":"ESTRUCTURAL","284995":"ESTRUCTURAL","285100":"ESTRUCTURAL","286681":"ESTRUCTURAL","268345":"ESTRUCTURAL","135988":"ESTRUCTURAL","241458":"ESTRUCTURAL","254235":"ESTRUCTURAL","267710":"ESTRUCTURAL","268343":"ESTRUCTURAL","287143":"QUINTO TURNO","375925":"QUINTO TURNO","399723":"QUINTO TURNO","406857":"QUINTO TURNO","434954":"QUINTO TURNO","400298":"QUINTO TURNO","404738":"QUINTO TURNO","407444":"QUINTO TURNO","407609":"QUINTO TURNO","422689":"QUINTO TURNO","356596":"QUINTO TURNO","385574":"QUINTO TURNO","400284":"QUINTO TURNO","400354":"QUINTO TURNO","400356":"QUINTO TURNO","400365":"QUINTO TURNO","375697":"QUINTO TURNO","386257":"QUINTO TURNO","395713":"QUINTO TURNO","408172":"QUINTO TURNO","253909":"ESTRUCTURAL","267296":"ESTRUCTURAL","267303":"ESTRUCTURAL","193321":"ESTRUCTURAL","179521":"ESTRUCTURAL","230411":"ESTRUCTURAL","135248":"ESTRUCTURAL","146255":"ESTRUCTURAL","291356":"ESTRUCTURAL","101318":"ESTRUCTURAL","132245":"ESTRUCTURAL","230390":"ESTRUCTURAL","240933":"ESTRUCTURAL","267318":"ESTRUCTURAL","284974":"ESTRUCTURAL","240934":"ESTRUCTURAL","135239":"ESTRUCTURAL","179517":"ESTRUCTURAL","240935":"ESTRUCTURAL","145520":"ESTRUCTURAL","286202":"CUARTO TURNO","328624":"CUARTO TURNO","331058":"CUARTO TURNO","357099":"CUARTO TURNO","397658":"CUARTO TURNO","397659":"CUARTO TURNO","307849":"CUARTO TURNO","331010":"CUARTO TURNO","357098":"CUARTO TURNO","374577":"CUARTO TURNO","395377":"CUARTO TURNO","307805":"CUARTO TURNO","345643":"CUARTO TURNO","351489":"CUARTO TURNO","357340":"CUARTO TURNO","375830":"CUARTO TURNO","324343":"CUARTO TURNO","345625":"CUARTO TURNO","345628":"CUARTO TURNO","374407":"CUARTO TURNO","395239":"CUARTO TURNO","308175":"CUARTO TURNO","324531":"CUARTO TURNO","328622":"CUARTO TURNO","345642":"CUARTO TURNO","385572":"CUARTO TURNO","328825":"CUARTO TURNO","331014":"CUARTO TURNO","350622":"CUARTO TURNO","291367":"CUARTO TURNO","306244":"CUARTO TURNO","291366":"CUARTO TURNO","308176":"CUARTO TURNO","350628":"CUARTO TURNO","324345":"CUARTO TURNO","344755":"CUARTO TURNO","250957":"CUARTO TURNO","324402":"CUARTO TURNO","324417":"CUARTO TURNO","241287":"ESTRUCTURAL","240746":"ESTRUCTURAL","218757":"ESTRUCTURAL","254202":"ESTRUCTURAL","267232":"ESTRUCTURAL","231474":"ESTRUCTURAL","267219":"ESTRUCTURAL","308177":"ESTRUCTURAL","307850":"ESTRUCTURAL","116613":"ESTRUCTURAL","116625":"ESTRUCTURAL","116636":"ESTRUCTURAL","152719":"ESTRUCTURAL","129952":"ESTRUCTURAL","174803":"ESTRUCTURAL","55827":"ESTRUCTURAL","241956":"ESTRUCTURAL","144456":"ESTRUCTURAL","254217":"ESTRUCTURAL","261960":"ESTRUCTURAL","178838":"ESTRUCTURAL","179915":"ESTRUCTURAL","229956":"ESTRUCTURAL","130490":"ESTRUCTURAL","285404":"ESTRUCTURAL","285431":"ESTRUCTURAL","306405":"ESTRUCTURAL","174376":"ESTRUCTURAL","179514":"ESTRUCTURAL","228864":"ESTRUCTURAL","241289":"ESTRUCTURAL","123115":"ESTRUCTURAL","123979":"ESTRUCTURAL","254218":"ESTRUCTURAL","179503":"ESTRUCTURAL","237005":"ESTRUCTURAL","254216":"ESTRUCTURAL","255885":"ESTRUCTURAL","261949":"ESTRUCTURAL","284957":"ESTRUCTURAL","284960":"ESTRUCTURAL","285000":"ESTRUCTURAL","285564":"ESTRUCTURAL","244804":"ESTRUCTURAL","253966":"ESTRUCTURAL","284963":"ESTRUCTURAL","284997":"ESTRUCTURAL","285395":"ESTRUCTURAL","254656":"ESTRUCTURAL","261955":"ESTRUCTURAL","261963":"ESTRUCTURAL","267475":"ESTRUCTURAL","253962":"ESTRUCTURAL","267151":"ESTRUCTURAL","267505":"ESTRUCTURAL","222912":"ESTRUCTURAL","230421":"ESTRUCTURAL","228861":"ESTRUCTURAL","261973":"CUARTO TURNO","306194":"CUARTO TURNO","306211":"CUARTO TURNO","306653":"CUARTO TURNO","319405":"CUARTO TURNO","324429":"CUARTO TURNO","324453":"CUARTO TURNO","330776":"CUARTO TURNO","352057":"CUARTO TURNO","354598":"CUARTO TURNO","379791":"CUARTO TURNO","385600":"CUARTO TURNO","394711":"CUARTO TURNO","394722":"CUARTO TURNO","394762":"CUARTO TURNO","397660":"CUARTO TURNO","397708":"CUARTO TURNO","254198":"CUARTO TURNO","284983":"CUARTO TURNO","285421":"CUARTO TURNO","310679":"CUARTO TURNO","339786":"CUARTO TURNO","345644":"CUARTO TURNO","351190":"CUARTO TURNO","351496":"CUARTO TURNO","351497":"CUARTO TURNO","351615":"CUARTO TURNO","354777":"CUARTO TURNO","374367":"CUARTO TURNO","375749":"CUARTO TURNO","380916":"CUARTO TURNO","394759":"CUARTO TURNO","400425":"CUARTO TURNO","400434":"CUARTO TURNO","407500":"CUARTO TURNO","285387":"CUARTO TURNO","306560":"CUARTO TURNO","324460":"CUARTO TURNO","335169":"CUARTO TURNO","345626":"CUARTO TURNO","352032":"CUARTO TURNO","354780":"CUARTO TURNO","374315":"CUARTO TURNO","374938":"CUARTO TURNO","394878":"CUARTO TURNO","394913":"CUARTO TURNO","395822":"CUARTO TURNO","254604":"CUARTO TURNO","325586":"CUARTO TURNO","328083":"CUARTO TURNO","335149":"CUARTO TURNO","339757":"CUARTO TURNO","345646":"CUARTO TURNO","354626":"CUARTO TURNO","374438":"CUARTO TURNO","375904":"CUARTO TURNO","394736":"CUARTO TURNO","394898":"CUARTO TURNO","400372":"CUARTO TURNO","400378":"CUARTO TURNO","285418":"CUARTO TURNO","306199":"CUARTO TURNO","319402":"CUARTO TURNO","325591":"CUARTO TURNO","328012":"CUARTO TURNO","329093":"CUARTO TURNO","335156":"CUARTO TURNO","374394":"CUARTO TURNO","374952":"CUARTO TURNO","374998":"CUARTO TURNO","394732":"CUARTO TURNO","394827":"CUARTO TURNO","407595":"CUARTO TURNO","422691":"CUARTO TURNO","434907":"CUARTO TURNO","307752":"CUARTO TURNO","319397":"CUARTO TURNO","345624":"CUARTO TURNO","395390":"CUARTO TURNO","306736":"CUARTO TURNO","308078":"CUARTO TURNO","313370":"CUARTO TURNO","354851":"CUARTO TURNO","394805":"CUARTO TURNO","306195":"CUARTO TURNO","313257":"CUARTO TURNO","324434":"CUARTO TURNO","339758":"CUARTO TURNO","379790":"CUARTO TURNO","407510":"CUARTO TURNO","306718":"CUARTO TURNO","307740":"CUARTO TURNO","328958":"CUARTO TURNO","356676":"CUARTO TURNO","284991":"CUARTO TURNO","284998":"CUARTO TURNO","307742":"CUARTO TURNO","375729":"CUARTO TURNO","400409":"CUARTO TURNO","284977":"CUARTO TURNO","285397":"CUARTO TURNO","328998":"CUARTO TURNO","329000":"CUARTO TURNO","240950":"ESTRUCTURAL","240940":"ESTRUCTURAL","55815":"ESTRUCTURAL","228862":"ESTRUCTURAL","253416":"ESTRUCTURAL","222412":"ESTRUCTURAL","118544":"ESTRUCTURAL","253988":"ESTRUCTURAL","209524":"ESTRUCTURAL","218266":"ESTRUCTURAL","83983":"ESTRUCTURAL","164747":"ESTRUCTURAL","218809":"ESTRUCTURAL","220121":"ESTRUCTURAL","228835":"ESTRUCTURAL","228960":"ESTRUCTURAL","229613":"ESTRUCTURAL","229557":"ESTRUCTURAL","240960":"ESTRUCTURAL","240962":"ESTRUCTURAL","374333":"QUINTO TURNO","374425":"QUINTO TURNO","399706":"QUINTO TURNO","405218":"QUINTO TURNO","408181":"QUINTO TURNO","422624":"QUINTO TURNO","434908":"QUINTO TURNO","380929":"QUINTO TURNO","385624":"QUINTO TURNO","394715":"QUINTO TURNO","395244":"QUINTO TURNO","395262":"QUINTO TURNO","395690":"QUINTO TURNO","434901":"QUINTO TURNO","209901":"QUINTO TURNO","374270":"QUINTO TURNO","379747":"QUINTO TURNO","394812":"QUINTO TURNO","395980":"QUINTO TURNO","400352":"QUINTO TURNO","422701":"QUINTO TURNO","329123":"QUINTO TURNO","374540":"QUINTO TURNO","379753":"QUINTO TURNO","400309":"QUINTO TURNO","406071":"QUINTO TURNO","422644":"QUINTO TURNO","55474":"ESTRUCTURAL","56031":"ESTRUCTURAL","61454":"ESTRUCTURAL","209570":"ESTRUCTURAL","81810":"ESTRUCTURAL","84009":"ESTRUCTURAL","105602":"ESTRUCTURAL","133095":"ESTRUCTURAL","291346":"ESTRUCTURAL","56060":"ESTRUCTURAL","57905":"ESTRUCTURAL","220073":"ESTRUCTURAL","82969":"ESTRUCTURAL","94309":"ESTRUCTURAL","114431":"ESTRUCTURAL","117702":"ESTRUCTURAL","130037":"ESTRUCTURAL","134770":"ESTRUCTURAL","52958":"ESTRUCTURAL","54783":"ESTRUCTURAL","55227":"ESTRUCTURAL","56077":"ESTRUCTURAL","61384":"ESTRUCTURAL","63062":"ESTRUCTURAL","72022":"ESTRUCTURAL","83390":"ESTRUCTURAL","113371":"ESTRUCTURAL","128691":"ESTRUCTURAL","130526":"ESTRUCTURAL","55510":"ESTRUCTURAL","71589":"ESTRUCTURAL","82975":"ESTRUCTURAL","119954":"ESTRUCTURAL","128686":"ESTRUCTURAL","129211":"ESTRUCTURAL","146814":"ESTRUCTURAL","152279":"ESTRUCTURAL","55249":"ESTRUCTURAL","55812":"ESTRUCTURAL","76633":"ESTRUCTURAL","85529":"ESTRUCTURAL","90895":"ESTRUCTURAL","98242":"ESTRUCTURAL","107436":"ESTRUCTURAL","119953":"ESTRUCTURAL","167865":"ESTRUCTURAL","57215":"ESTRUCTURAL","61381":"ESTRUCTURAL","209897":"ESTRUCTURAL","86143":"ESTRUCTURAL","91789":"ESTRUCTURAL","113365":"ESTRUCTURAL","117619":"ESTRUCTURAL","124497":"ESTRUCTURAL","132716":"ESTRUCTURAL","154336":"ESTRUCTURAL","190176":"ESTRUCTURAL","53810":"ESTRUCTURAL","56058":"ESTRUCTURAL","230412":"ESTRUCTURAL","231520":"ESTRUCTURAL","84044":"ESTRUCTURAL","128692":"ESTRUCTURAL","78389":"ESTRUCTURAL","179543":"ESTRUCTURAL","54815":"ESTRUCTURAL","209557":"ESTRUCTURAL","228865":"ESTRUCTURAL","82143":"ESTRUCTURAL","241285":"ESTRUCTURAL","132008":"ESTRUCTURAL","62946":"ESTRUCTURAL","241500":"ESTRUCTURAL","130240":"ESTRUCTURAL","295064":"ESTRUCTURAL","299237":"ESTRUCTURAL","209561":"ESTRUCTURAL","222910":"ESTRUCTURAL","260224":"ESTRUCTURAL","267721":"ESTRUCTURAL","295058":"ESTRUCTURAL","306624":"ESTRUCTURAL","230409":"ESTRUCTURAL","267108":"ESTRUCTURAL","268338":"ESTRUCTURAL","284988":"ESTRUCTURAL","286759":"ESTRUCTURAL","292086":"ESTRUCTURAL","299236":"ESTRUCTURAL","284984":"ESTRUCTURAL","291355":"ESTRUCTURAL","306668":"ESTRUCTURAL","306673":"ESTRUCTURAL","179914":"ESTRUCTURAL","241473":"ESTRUCTURAL","116631":"ESTRUCTURAL","254667":"ESTRUCTURAL","307807":"ESTRUCTURAL","307904":"ESTRUCTURAL","81419":"ESTRUCTURAL","119225":"ESTRUCTURAL","286753":"ESTRUCTURAL","306631":"ESTRUCTURAL","109766":"ESTRUCTURAL","71612":"ESTRUCTURAL","230814":"ESTRUCTURAL","117635":"ESTRUCTURAL","260322":"ESTRUCTURAL","306661":"ESTRUCTURAL","52943":"ESTRUCTURAL","55804":"ESTRUCTURAL","64466":"ESTRUCTURAL","84029":"ESTRUCTURAL","84042":"ESTRUCTURAL","88548":"ESTRUCTURAL","146224":"ESTRUCTURAL","151692":"ESTRUCTURAL","113897":"ESTRUCTURAL","61478":"ESTRUCTURAL","71602":"ESTRUCTURAL","123111":"ESTRUCTURAL","126092":"ESTRUCTURAL","154562":"ESTRUCTURAL","55518":"ESTRUCTURAL","65211":"ESTRUCTURAL","73924":"ESTRUCTURAL","115061":"ESTRUCTURAL","117071":"ESTRUCTURAL","118156":"ESTRUCTURAL","128672":"ESTRUCTURAL","55201":"ESTRUCTURAL","86427":"ESTRUCTURAL","90876":"ESTRUCTURAL","93888":"ESTRUCTURAL","157071":"ESTRUCTURAL","84038":"ESTRUCTURAL","116661":"ESTRUCTURAL","133864":"ESTRUCTURAL","56071":"ESTRUCTURAL","209553":"ESTRUCTURAL","78394":"ESTRUCTURAL","84003":"ESTRUCTURAL","241476":"ESTRUCTURAL","241479":"ESTRUCTURAL","230396":"ESTRUCTURAL","267856":"ESTRUCTURAL","121436":"ESTRUCTURAL","209531":"ESTRUCTURAL","253912":"ESTRUCTURAL","53787":"ESTRUCTURAL","55257":"ESTRUCTURAL","220017":"ESTRUCTURAL","230384":"ESTRUCTURAL","400118":"ESTRUCTURAL","400122":"ESTRUCTURAL","400125":"ESTRUCTURAL","400126":"ESTRUCTURAL","400149":"ESTRUCTURAL","528280":"ESTRUCTURAL","528299":"ESTRUCTURAL","528302":"ESTRUCTURAL","168304":"ESTRUCTURAL","203536":"ESTRUCTURAL","209516":"ESTRUCTURAL","209893":"ESTRUCTURAL","219733":"ESTRUCTURAL","223572":"ESTRUCTURAL","228863":"ESTRUCTURAL","124083":"ESTRUCTURAL","129208":"ESTRUCTURAL","267818":"ESTRUCTURAL","425058":"ESTRUCTURAL","425059":"ESTRUCTURAL","425073":"ESTRUCTURAL","528304":"ESTRUCTURAL","528310":"ESTRUCTURAL","222915":"ESTRUCTURAL","83381":"ESTRUCTURAL","108109":"ESTRUCTURAL","254593":"ESTRUCTURAL","266776":"ESTRUCTURAL","166918":"ESTRUCTURAL","167866":"ESTRUCTURAL","209547":"ESTRUCTURAL","209572":"ESTRUCTURAL","240928":"ESTRUCTURAL","241950":"ESTRUCTURAL","244801":"ESTRUCTURAL","244805":"ESTRUCTURAL","260225":"ESTRUCTURAL","260227":"ESTRUCTURAL","267094":"ESTRUCTURAL","306237":"CUARTO TURNO","306281":"CUARTO TURNO","306685":"CUARTO TURNO","306713":"CUARTO TURNO","306722":"CUARTO TURNO","307640":"CUARTO TURNO","356677":"CUARTO TURNO","483953":"CUARTO TURNO","483954":"CUARTO TURNO","483964":"CUARTO TURNO","484417":"CUARTO TURNO","307633":"CUARTO TURNO","307667":"CUARTO TURNO","307900":"CUARTO TURNO","307902":"CUARTO TURNO","313318":"CUARTO TURNO","335188":"CUARTO TURNO","345612":"CUARTO TURNO","374715":"CUARTO TURNO","395253":"CUARTO TURNO","400274":"CUARTO TURNO","306222":"CUARTO TURNO","306627":"CUARTO TURNO","306628":"CUARTO TURNO","306666":"CUARTO TURNO","307863":"CUARTO TURNO","308086":"CUARTO TURNO","324281":"CUARTO TURNO","330734":"CUARTO TURNO","345602":"CUARTO TURNO","286134":"CUARTO TURNO","292085":"CUARTO TURNO","307628":"CUARTO TURNO","308057":"CUARTO TURNO","308085":"CUARTO TURNO","324478":"CUARTO TURNO","330219":"CUARTO TURNO","345610":"CUARTO TURNO","345629":"CUARTO TURNO","356671":"CUARTO TURNO","291369":"CUARTO TURNO","306636":"CUARTO TURNO","307659":"CUARTO TURNO","324280":"CUARTO TURNO","351699":"CUARTO TURNO","356678":"CUARTO TURNO","10217":"CUARTO TURNO","330162":"CUARTO TURNO","357096":"CUARTO TURNO","374631":"CUARTO TURNO","394598":"CUARTO TURNO","394770":"CUARTO TURNO","289001":"CUARTO TURNO","306296":"CUARTO TURNO","307625":"CUARTO TURNO","325579":"CUARTO TURNO","330173":"CUARTO TURNO","356672":"CUARTO TURNO","306367":"CUARTO TURNO","330744":"CUARTO TURNO","331046":"CUARTO TURNO","339766":"CUARTO TURNO","339777":"CUARTO TURNO","230399":"CUARTO TURNO","291362":"CUARTO TURNO","306290":"CUARTO TURNO","306382":"CUARTO TURNO","345609":"CUARTO TURNO","243506":"CUARTO TURNO","306616":"CUARTO TURNO","307861":"CUARTO TURNO","14021":"CUARTO TURNO","394889":"CUARTO TURNO","254598":"CUARTO TURNO","306729":"CUARTO TURNO","324469":"CUARTO TURNO","330200":"CUARTO TURNO","330846":"CUARTO TURNO","345601":"CUARTO TURNO","22468":"CUARTO TURNO","158737":"CUARTO TURNO","240927":"ESTRUCTURAL","84546":"ESTRUCTURAL","241949":"ESTRUCTURAL","266709":"ESTRUCTURAL","267542":"ESTRUCTURAL","394834":"QUINTO TURNO","399692":"QUINTO TURNO","399920":"QUINTO TURNO","400256":"QUINTO TURNO","400367":"QUINTO TURNO","400402":"QUINTO TURNO","407474":"QUINTO TURNO","407490":"QUINTO TURNO","356669":"QUINTO TURNO","399947":"QUINTO TURNO","399967":"QUINTO TURNO","400263":"QUINTO TURNO","400300":"QUINTO TURNO","400419":"QUINTO TURNO","406060":"QUINTO TURNO","394594":"QUINTO TURNO","394839":"QUINTO TURNO","399690":"QUINTO TURNO","399734":"QUINTO TURNO","405227":"QUINTO TURNO","406144":"QUINTO TURNO","379690":"QUINTO TURNO","394769":"QUINTO TURNO","399699":"QUINTO TURNO","399747":"QUINTO TURNO","400285":"QUINTO TURNO","400289":"QUINTO TURNO","406068":"QUINTO TURNO","407436":"QUINTO TURNO","54781":"ESTRUCTURAL","61380":"ESTRUCTURAL","113380":"ESTRUCTURAL","116634":"ESTRUCTURAL","124098":"ESTRUCTURAL","126793":"ESTRUCTURAL","130183":"ESTRUCTURAL","131284":"ESTRUCTURAL","179492":"ESTRUCTURAL","66017":"ESTRUCTURAL","116616":"ESTRUCTURAL","122878":"ESTRUCTURAL","123607":"ESTRUCTURAL","124084":"ESTRUCTURAL","125854":"ESTRUCTURAL","151754":"ESTRUCTURAL","56062":"ESTRUCTURAL","58838":"ESTRUCTURAL","75245":"ESTRUCTURAL","228850":"ESTRUCTURAL","107772":"ESTRUCTURAL","113367":"ESTRUCTURAL","125850":"ESTRUCTURAL","128667":"ESTRUCTURAL","131183":"ESTRUCTURAL","290861":"ESTRUCTURAL","55777":"ESTRUCTURAL","84553":"ESTRUCTURAL","105600":"ESTRUCTURAL","125038":"ESTRUCTURAL","127265":"ESTRUCTURAL","127845":"ESTRUCTURAL","133064":"ESTRUCTURAL","134330":"ESTRUCTURAL","155347":"ESTRUCTURAL","52920":"ESTRUCTURAL","56072":"ESTRUCTURAL","81815":"ESTRUCTURAL","96331":"ESTRUCTURAL","115648":"ESTRUCTURAL","126537":"ESTRUCTURAL","179502":"ESTRUCTURAL","55475":"ESTRUCTURAL","66197":"ESTRUCTURAL","84008":"ESTRUCTURAL","84237":"ESTRUCTURAL","90487":"ESTRUCTURAL","119586":"ESTRUCTURAL","131176":"ESTRUCTURAL","164074":"ESTRUCTURAL","240956":"ESTRUCTURAL","241267":"ESTRUCTURAL","84804":"ESTRUCTURAL","108400":"ESTRUCTURAL","253959":"ESTRUCTURAL","253984":"ESTRUCTURAL","254047":"ESTRUCTURAL","275236":"ESTRUCTURAL","228846":"ESTRUCTURAL","122199":"ESTRUCTURAL","253981":"ESTRUCTURAL","266637":"ESTRUCTURAL","164053":"ESTRUCTURAL","253983":"ESTRUCTURAL","267135":"ESTRUCTURAL","275258":"ESTRUCTURAL","284987":"ESTRUCTURAL","60060":"ESTRUCTURAL","66021":"ESTRUCTURAL","108394":"ESTRUCTURAL","209954":"ESTRUCTURAL","222408":"ESTRUCTURAL","150314":"ESTRUCTURAL","260289":"ESTRUCTURAL","267445":"ESTRUCTURAL","286677":"ESTRUCTURAL","90883":"ESTRUCTURAL","209549":"ESTRUCTURAL","209905":"ESTRUCTURAL","210524":"ESTRUCTURAL","222406":"ESTRUCTURAL","105586":"ESTRUCTURAL","291328":"ESTRUCTURAL","58833":"ESTRUCTURAL","213381":"ESTRUCTURAL","71593":"ESTRUCTURAL","240738":"ESTRUCTURAL","241498":"ESTRUCTURAL","253668":"ESTRUCTURAL","267256":"ESTRUCTURAL","267569":"ESTRUCTURAL","275237":"ESTRUCTURAL","286675":"ESTRUCTURAL","286678":"ESTRUCTURAL","135240":"ESTRUCTURAL","253415":"ESTRUCTURAL","306250":"ESTRUCTURAL","229609":"ESTRUCTURAL","241501":"ESTRUCTURAL","291342":"ESTRUCTURAL","351492":"ESTRUCTURAL","354634":"ESTRUCTURAL","228962":"ESTRUCTURAL","240955":"ESTRUCTURAL","123985":"ESTRUCTURAL","253406":"ESTRUCTURAL","253897":"ESTRUCTURAL","254583":"ESTRUCTURAL","284955":"ESTRUCTURAL","114430":"ESTRUCTURAL","122209":"ESTRUCTURAL","125852":"ESTRUCTURAL","152718":"ESTRUCTURAL","66016":"ESTRUCTURAL","240945":"ESTRUCTURAL","115670":"ESTRUCTURAL","131180":"ESTRUCTURAL","55476":"ESTRUCTURAL","84234":"ESTRUCTURAL","52941":"ESTRUCTURAL","146217":"ESTRUCTURAL","244815":"ESTRUCTURAL","254188":"ESTRUCTURAL","209536":"ESTRUCTURAL","261967":"ESTRUCTURAL","104127":"ESTRUCTURAL","253408":"ESTRUCTURAL","253982":"ESTRUCTURAL","266781":"ESTRUCTURAL","267309":"ESTRUCTURAL","275255":"ESTRUCTURAL","285522":"ESTRUCTURAL","291329":"ESTRUCTURAL","53494":"ESTRUCTURAL","66020":"ESTRUCTURAL","174362":"ESTRUCTURAL","254584":"ESTRUCTURAL","267871":"ESTRUCTURAL","291332":"ESTRUCTURAL","230408":"ESTRUCTURAL","105606":"ESTRUCTURAL","120318":"ESTRUCTURAL","285403":"ESTRUCTURAL","230405":"ESTRUCTURAL","105598":"ESTRUCTURAL","84030":"ESTRUCTURAL","209513":"ESTRUCTURAL","218263":"ESTRUCTURAL","75655":"ESTRUCTURAL","240965":"ESTRUCTURAL","92588":"ESTRUCTURAL","135237":"ESTRUCTURAL","478717":"ESTRUCTURAL","478718":"ESTRUCTURAL","478722":"ESTRUCTURAL","478727":"ESTRUCTURAL","199925":"ESTRUCTURAL","59478":"ESTRUCTURAL","218810":"ESTRUCTURAL","241677":"ESTRUCTURAL","454941":"ESTRUCTURAL","454944":"ESTRUCTURAL","454947":"ESTRUCTURAL","478719":"ESTRUCTURAL","478721":"ESTRUCTURAL","479055":"ESTRUCTURAL","179953":"ESTRUCTURAL","228901":"ESTRUCTURAL","253734":"ESTRUCTURAL","266771":"ESTRUCTURAL","267842":"ESTRUCTURAL","230130":"ESTRUCTURAL","240951":"ESTRUCTURAL","253995":"ESTRUCTURAL","254574":"ESTRUCTURAL","260293":"ESTRUCTURAL","59509":"ESTRUCTURAL","224181":"ESTRUCTURAL","230122":"ESTRUCTURAL","240936":"ESTRUCTURAL","240944":"ESTRUCTURAL","253997":"ESTRUCTURAL","254222":"ESTRUCTURAL","260295":"ESTRUCTURAL","267124":"ESTRUCTURAL","267137":"ESTRUCTURAL","55487":"ESTRUCTURAL","209551":"ESTRUCTURAL","241456":"ESTRUCTURAL","98250":"ESTRUCTURAL","135243":"ESTRUCTURAL","253963":"ESTRUCTURAL","267133":"ESTRUCTURAL","64912":"ESTRUCTURAL","146065":"ESTRUCTURAL","275247":"CUARTO TURNO","306261":"CUARTO TURNO","306716":"CUARTO TURNO","306728":"CUARTO TURNO","313296":"CUARTO TURNO","324379":"CUARTO TURNO","334010":"CUARTO TURNO","339846":"CUARTO TURNO","344762":"CUARTO TURNO","400390":"CUARTO TURNO","211346":"CUARTO TURNO","267460":"CUARTO TURNO","306269":"CUARTO TURNO","307756":"CUARTO TURNO","328433":"CUARTO TURNO","330067":"CUARTO TURNO","339845":"CUARTO TURNO","350615":"CUARTO TURNO","286685":"CUARTO TURNO","306732":"CUARTO TURNO","329108":"CUARTO TURNO","330279":"CUARTO TURNO","394743":"CUARTO TURNO","394751":"CUARTO TURNO","416940":"CUARTO TURNO","416959":"CUARTO TURNO","416960":"CUARTO TURNO","66199":"CUARTO TURNO","218294":"CUARTO TURNO","267161":"CUARTO TURNO","285434":"CUARTO TURNO","285977":"CUARTO TURNO","295067":"CUARTO TURNO","306699":"CUARTO TURNO","307712":"CUARTO TURNO","330212":"CUARTO TURNO","374714":"CUARTO TURNO","260301":"CUARTO TURNO","285417":"CUARTO TURNO","286682":"CUARTO TURNO","306735":"CUARTO TURNO","308186":"CUARTO TURNO","330791":"CUARTO TURNO","334496":"CUARTO TURNO","354556":"CUARTO TURNO","267238":"CUARTO TURNO","267314":"CUARTO TURNO","285429":"CUARTO TURNO","285968":"CUARTO TURNO","285994":"CUARTO TURNO","306724":"CUARTO TURNO","286165":"CUARTO TURNO","307732":"CUARTO TURNO","308075":"CUARTO TURNO","330293":"CUARTO TURNO","330784":"CUARTO TURNO","286671":"CUARTO TURNO","307730":"CUARTO TURNO","307783":"CUARTO TURNO","324349":"CUARTO TURNO","330278":"CUARTO TURNO","339847":"CUARTO TURNO","285038":"CUARTO TURNO","286689":"CUARTO TURNO","286731":"CUARTO TURNO","291743":"CUARTO TURNO","307878":"CUARTO TURNO","330025":"CUARTO TURNO","356661":"CUARTO TURNO","288488":"CUARTO TURNO","306403":"CUARTO TURNO","306807":"CUARTO TURNO","308183":"CUARTO TURNO","309553":"CUARTO TURNO","94928":"CUARTO TURNO","267467":"CUARTO TURNO","267863":"CUARTO TURNO","291327":"CUARTO TURNO","306254":"CUARTO TURNO","339801":"CUARTO TURNO","76631":"ESTRUCTURAL","228842":"ESTRUCTURAL","123983":"ESTRUCTURAL","266717":"ESTRUCTURAL","266778":"ESTRUCTURAL","267461":"ESTRUCTURAL","285006":"ESTRUCTURAL","303374":"QUINTO TURNO","335498":"QUINTO TURNO","395961":"QUINTO TURNO","408175":"QUINTO TURNO","374384":"QUINTO TURNO","374424":"QUINTO TURNO","400400":"QUINTO TURNO","404763":"QUINTO TURNO","407439":"QUINTO TURNO","434845":"QUINTO TURNO","375870":"QUINTO TURNO","375890":"QUINTO TURNO","399708":"QUINTO TURNO","400261":"QUINTO TURNO","407586":"QUINTO TURNO","408154":"QUINTO TURNO","380923":"QUINTO TURNO","394599":"QUINTO TURNO","395374":"QUINTO TURNO","395693":"QUINTO TURNO","400435":"QUINTO TURNO","407458":"QUINTO TURNO","54794":"ESTRUCTURAL","66438":"ESTRUCTURAL","71598":"ESTRUCTURAL","83000":"ESTRUCTURAL","84263":"ESTRUCTURAL","90463":"ESTRUCTURAL","127841":"ESTRUCTURAL","132012":"ESTRUCTURAL","66015":"ESTRUCTURAL","167869":"ESTRUCTURAL","179520":"ESTRUCTURAL","113368":"ESTRUCTURAL","116653":"ESTRUCTURAL","119093":"ESTRUCTURAL","123110":"ESTRUCTURAL","128670":"ESTRUCTURAL","132013":"ESTRUCTURAL","134773":"ESTRUCTURAL","150312":"ESTRUCTURAL","52964":"ESTRUCTURAL","67324":"ESTRUCTURAL","93589":"ESTRUCTURAL","125039":"ESTRUCTURAL","130237":"ESTRUCTURAL","173973":"ESTRUCTURAL","174363":"ESTRUCTURAL","52963":"ESTRUCTURAL","71614":"ESTRUCTURAL","84811":"ESTRUCTURAL","121434":"ESTRUCTURAL","132072":"ESTRUCTURAL","165565":"ESTRUCTURAL","168773":"ESTRUCTURAL","82999":"ESTRUCTURAL","84011":"ESTRUCTURAL","86904":"ESTRUCTURAL","93005":"ESTRUCTURAL","96597":"ESTRUCTURAL","124094":"ESTRUCTURAL","130320":"ESTRUCTURAL","253902":"ESTRUCTURAL","254191":"ESTRUCTURAL","165570":"ESTRUCTURAL","61372":"ESTRUCTURAL","209922":"ESTRUCTURAL","229572":"ESTRUCTURAL","79929":"ESTRUCTURAL","237056":"ESTRUCTURAL","126087":"ESTRUCTURAL","253721":"ESTRUCTURAL","253724":"ESTRUCTURAL","254602":"ESTRUCTURAL","286103":"ESTRUCTURAL","288460":"ESTRUCTURAL","201116":"ESTRUCTURAL","203627":"ESTRUCTURAL","74157":"ESTRUCTURAL","241502":"ESTRUCTURAL","244793":"ESTRUCTURAL","90880":"ESTRUCTURAL","107439":"ESTRUCTURAL","108401":"ESTRUCTURAL","253955":"ESTRUCTURAL","254599":"ESTRUCTURAL","152722":"ESTRUCTURAL","166394":"ESTRUCTURAL","54785":"ESTRUCTURAL","62935":"ESTRUCTURAL","209899":"ESTRUCTURAL","218782":"ESTRUCTURAL","230425":"ESTRUCTURAL","84236":"ESTRUCTURAL","138048":"ESTRUCTURAL","253716":"ESTRUCTURAL","152701":"ESTRUCTURAL","267788":"ESTRUCTURAL","241623":"ESTRUCTURAL","123380":"ESTRUCTURAL","254242":"ESTRUCTURAL","145454":"ESTRUCTURAL","254559":"ESTRUCTURAL","285426":"ESTRUCTURAL","209566":"ESTRUCTURAL","241272":"ESTRUCTURAL","253972":"ESTRUCTURAL","260992":"ESTRUCTURAL","261953":"ESTRUCTURAL","275254":"ESTRUCTURAL","203534":"ESTRUCTURAL","203674":"ESTRUCTURAL","73705":"ESTRUCTURAL","228948":"ESTRUCTURAL","240949":"ESTRUCTURAL","253906":"ESTRUCTURAL","286777":"ESTRUCTURAL","241268":"ESTRUCTURAL","253672":"ESTRUCTURAL","254214":"ESTRUCTURAL","254239":"ESTRUCTURAL","286761":"ESTRUCTURAL","306207":"ESTRUCTURAL","241280":"ESTRUCTURAL","244949":"ESTRUCTURAL","253714":"ESTRUCTURAL","276152":"ESTRUCTURAL","296876":"ESTRUCTURAL","179880":"ESTRUCTURAL","59697":"ESTRUCTURAL","230626":"ESTRUCTURAL","241278":"ESTRUCTURAL","122454":"ESTRUCTURAL","137515":"ESTRUCTURAL","138078":"ESTRUCTURAL","395837":"ESTRUCTURAL","64465":"ESTRUCTURAL","166137":"ESTRUCTURAL","173960":"ESTRUCTURAL","85534":"ESTRUCTURAL","106409":"ESTRUCTURAL","56041":"ESTRUCTURAL","106763":"ESTRUCTURAL","81799":"ESTRUCTURAL","254561":"ESTRUCTURAL","296905":"ESTRUCTURAL","203613":"ESTRUCTURAL","330997":"ESTRUCTURAL","350654":"ESTRUCTURAL","375828":"ESTRUCTURAL","106762":"ESTRUCTURAL","214535":"ESTRUCTURAL","120152":"ESTRUCTURAL","127855":"ESTRUCTURAL","116640":"ESTRUCTURAL","116641":"ESTRUCTURAL","116643":"ESTRUCTURAL","116644":"ESTRUCTURAL","55818":"ESTRUCTURAL","231699":"ESTRUCTURAL","131709":"ESTRUCTURAL","329291":"ESTRUCTURAL","395701":"ESTRUCTURAL","253683":"ESTRUCTURAL","203604":"ESTRUCTURAL","254215":"ESTRUCTURAL","296889":"ESTRUCTURAL","219732":"ESTRUCTURAL","267287":"ESTRUCTURAL","267857":"ESTRUCTURAL","129949":"ESTRUCTURAL","152913":"ESTRUCTURAL","174842":"ESTRUCTURAL","213412":"ESTRUCTURAL","241494":"ESTRUCTURAL","197290":"ESTRUCTURAL","105954":"ESTRUCTURAL","125314":"ESTRUCTURAL","130873":"ESTRUCTURAL","228922":"ESTRUCTURAL","152711":"ESTRUCTURAL","261956":"ESTRUCTURAL","267816":"ESTRUCTURAL","166321":"ESTRUCTURAL","116626":"ESTRUCTURAL","116650":"ESTRUCTURAL","253715":"ESTRUCTURAL","254226":"ESTRUCTURAL","266772":"ESTRUCTURAL","209535":"ESTRUCTURAL","215086":"ESTRUCTURAL","230127":"ESTRUCTURAL","230401":"ESTRUCTURAL","230624":"ESTRUCTURAL","135986":"ESTRUCTURAL","150319":"ESTRUCTURAL","306408":"ESTRUCTURAL","292033":"CUARTO TURNO","306248":"CUARTO TURNO","330202":"CUARTO TURNO","330273":"CUARTO TURNO","330961":"CUARTO TURNO","334051":"CUARTO TURNO","334606":"CUARTO TURNO","334617":"CUARTO TURNO","335187":"CUARTO TURNO","350506":"CUARTO TURNO","351701":"CUARTO TURNO","357314":"CUARTO TURNO","385593":"CUARTO TURNO","397662":"CUARTO TURNO","435774":"CUARTO TURNO","192746":"CUARTO TURNO","253737":"CUARTO TURNO","295055":"CUARTO TURNO","324421":"CUARTO TURNO","331003":"CUARTO TURNO","334035":"CUARTO TURNO","339802":"CUARTO TURNO","351490":"CUARTO TURNO","354623":"CUARTO TURNO","356597":"CUARTO TURNO","357287":"CUARTO TURNO","374409":"CUARTO TURNO","379903":"CUARTO TURNO","395968":"CUARTO TURNO","492775":"CUARTO TURNO","238267":"CUARTO TURNO","276404":"CUARTO TURNO","292032":"CUARTO TURNO","296880":"CUARTO TURNO","306734":"CUARTO TURNO","306742":"CUARTO TURNO","307715":"CUARTO TURNO","307729":"CUARTO TURNO","308184":"CUARTO TURNO","319418":"CUARTO TURNO","334547":"CUARTO TURNO","354553":"CUARTO TURNO","395954":"CUARTO TURNO","286170":"CUARTO TURNO","286669":"CUARTO TURNO","306707":"CUARTO TURNO","325553":"CUARTO TURNO","330331":"CUARTO TURNO","331122":"CUARTO TURNO","334014":"CUARTO TURNO","351354":"CUARTO TURNO","351423":"CUARTO TURNO","351695":"CUARTO TURNO","354565":"CUARTO TURNO","394892":"CUARTO TURNO","395423":"CUARTO TURNO","51123":"CUARTO TURNO","306593":"CUARTO TURNO","307879":"CUARTO TURNO","325557":"CUARTO TURNO","328997":"CUARTO TURNO","330337":"CUARTO TURNO","334009":"CUARTO TURNO","334020":"CUARTO TURNO","334033":"CUARTO TURNO","334044":"CUARTO TURNO","339859":"CUARTO TURNO","350540":"CUARTO TURNO","351401":"CUARTO TURNO","354824":"CUARTO TURNO","374868":"CUARTO TURNO","395831":"CUARTO TURNO","395965":"CUARTO TURNO","48745":"CUARTO TURNO","64519":"CUARTO TURNO","292030":"CUARTO TURNO","307704":"CUARTO TURNO","307905":"CUARTO TURNO","354034":"CUARTO TURNO","385604":"CUARTO TURNO","285008":"CUARTO TURNO","306215":"CUARTO TURNO","330134":"CUARTO TURNO","350571":"CUARTO TURNO","267947":"CUARTO TURNO","286686":"CUARTO TURNO","286819":"CUARTO TURNO","292065":"CUARTO TURNO","306719":"CUARTO TURNO","339761":"CUARTO TURNO","307747":"CUARTO TURNO","308039":"CUARTO TURNO","313309":"CUARTO TURNO","275233":"CUARTO TURNO","285020":"CUARTO TURNO","286172":"CUARTO TURNO","286679":"CUARTO TURNO","334609":"CUARTO TURNO","492778":"ESTRUCTURAL","203868":"CUARTO TURNO","286688":"CUARTO TURNO","308077":"CUARTO TURNO","354613":"CUARTO TURNO","357303":"CUARTO TURNO","394862":"CUARTO TURNO","277235":"QUINTO TURNO","351720":"QUINTO TURNO","354557":"QUINTO TURNO","385569":"QUINTO TURNO","385639":"QUINTO TURNO","407596":"QUINTO TURNO","50583":"QUINTO TURNO","122762":"QUINTO TURNO","351409":"QUINTO TURNO","399785":"QUINTO TURNO","400281":"QUINTO TURNO","405326":"QUINTO TURNO","422673":"QUINTO TURNO","434896":"QUINTO TURNO","435775":"QUINTO TURNO","375773":"QUINTO TURNO","395256":"QUINTO TURNO","395994":"QUINTO TURNO","404745":"QUINTO TURNO","422636":"QUINTO TURNO","422700":"QUINTO TURNO","380905":"QUINTO TURNO","395686":"QUINTO TURNO","399809":"QUINTO TURNO","422640":"QUINTO TURNO","435809":"QUINTO TURNO","435826":"QUINTO TURNO","75784":"QUINTO TURNO"};
+const LBL={"ESTRUCTURAL":"Estructural","CUARTO TURNO":"Cuarto turno","QUINTO TURNO":"Quinto turno","FIJO DISCONTINUO":"Fijo discontinuo"};
+
+function go(n){document.querySelectorAll('.step').forEach(function(s){s.classList.remove('active');});document.getElementById('s'+n).classList.add('active');}
+function showErr(id,msg){var e=document.getElementById(id);if(msg){e.style.display='block';e.textContent='⚠ '+msg;}else e.style.display='none';}
+function setBorder(id,ok){document.getElementById(id).style.borderColor=ok===true?'#86efac':ok===false?'#fca5a5':'';}
+
+function chkN(nId,eNId,cId,eCId){var v=document.getElementById(nId).value.trim();if(!v){setBorder(nId,false);showErr(eNId,'');return;}if(DB[v]){setBorder(nId,true);showErr(eNId,'');}else{setBorder(nId,false);showErr(eNId,'Número de empleado no encontrado en el sistema');}chkC(nId,cId,eCId);}
+function chkC(nId,cId,eCId){var n=document.getElementById(nId).value.trim(),c=document.getElementById(cId).value;if(!c){setBorder(cId,null);showErr(eCId,'');return;}if(!n||!DB[n]){showErr(eCId,'');return;}if(DB[n]===c){setBorder(cId,true);showErr(eCId,'');}else{setBorder(cId,false);showErr(eCId,'El colectivo indicado no es correcto');}}
+function validarPersona(ap,nom,num,col,eAp,eNom,eNum,eCol){var ok=true;var apV=document.getElementById(ap).value.trim(),nomV=document.getElementById(nom).value.trim(),numV=document.getElementById(num).value.trim(),colV=document.getElementById(col).value;if(!apV){setBorder(ap,false);showErr(eAp,'Introduce los apellidos');ok=false;}else{setBorder(ap,true);showErr(eAp,'');}if(!nomV){setBorder(nom,false);showErr(eNom,'Introduce el nombre');ok=false;}else{setBorder(nom,true);showErr(eNom,'');}if(!numV||!DB[numV]){setBorder(num,false);showErr(eNum,!numV?'Introduce el número de empleado':'Número no encontrado');ok=false;}if(!colV){setBorder(col,false);showErr(eCol,'Selecciona el colectivo');ok=false;}else if(DB[numV]&&DB[numV]!==colV){setBorder(col,false);showErr(eCol,'El colectivo indicado no es correcto');ok=false;}return ok;}
+function goS2(){if(validarPersona('ap','nom','num','col','e_ap','e_nom','e_num','e_col'))go(2);}
+function goS3(){if(validarPersona('cap','cnom','cnum','ccol','e_cap','e_cnom','e_cnum','e_ccol')){buildDias('p','dc_p');go(3);}}
+
+function getMonISO(iso){var d=new Date(iso+'T00:00:00'),dy=d.getDay();d.setDate(d.getDate()+(dy===0?-6:1-dy));return d.toISOString().split('T')[0];}
+function getMonDMY(dmy){if(!dmy)return null;var p=dmy.split('/');if(p.length!==3)return null;return getMonISO(p[2]+'-'+p[1].padStart(2,'0')+'-'+p[0].padStart(2,'0'));}
+function isoToDMY(iso){if(!iso)return'';var p=iso.split('-');return p[2]+'/'+p[1]+'/'+p[0];}
+function isoToDMYDisplay(iso){if(!iso||iso==='—')return'—';var p=iso.split('-');if(p.length!==3)return iso;return p[2]+'/'+p[1]+'/'+p[0];}
+function getMinMonday(){var h=new Date();h.setHours(0,0,0,0);var t=new Date(h);t.setDate(t.getDate()+15);var dy=t.getDay();if(dy!==1)t.setDate(t.getDate()+(dy===0?1:8-dy));return t.toISOString().split('T')[0];}
+function getRefMon(){for(var pp of['p','s'])for(var i=0;i<DIAS;i++){var e=document.getElementById(pp+'f'+i);if(e&&e.value)return getMonISO(e.value);}return null;}
+
+function valFecha(p,i){var el=document.getElementById(p+'f'+i),er=document.getElementById(p+'fe'+i);if(!el||!er)return true;if(!el.value){er.style.display='none';el.style.borderColor='';return true;}var y=parseInt(el.value.split('-')[0]),cy=new Date().getFullYear();if(y!==cy){er.style.display='block';er.textContent='⚠ La fecha debe ser del año '+cy;el.style.borderColor='#fca5a5';return false;}var minM=getMinMonday(),thisM=getMonISO(el.value);if(thisM<minM){var ld=new Date(thisM+'T00:00:00');ld.setDate(ld.getDate()-15);er.style.display='block';er.textContent='⚠ El plazo venció el '+ld.toLocaleDateString('es-ES')+'. Solicita con al menos 15 días de antelación.';el.style.borderColor='#fca5a5';return false;}var ref=getRefMon();if(ref&&thisM!==ref){er.style.display='block';er.textContent='⚠ Todas las fechas deben ser de la misma semana.';el.style.borderColor='#fca5a5';return false;}er.style.display='none';el.style.borderColor='#86efac';return true;}
+function onFecha(p,i){valFecha(p,i);for(var pp of['p','s'])for(var j=0;j<DIAS;j++){if(pp===p&&j===i)continue;var e=document.getElementById(pp+'f'+j);if(e&&e.value)valFecha(pp,j);}recalc(p);}
+
+function toMin(t){if(!t)return 0;var h=parseInt(t.split(':')[0]),m=parseInt(t.split(':')[1]);return h*60+m;}
+function durMin(e,s){var em=toMin(e),sm=toMin(s);return sm>em?sm-em:1440-em+sm;}
+function fmtH(m){var h=Math.floor(m/60),mn=m%60;return mn?h+'h '+mn+'min':h+'h';}
+function timeOpts(id){var o='<option value="">--:--</option>';for(var h=0;h<24;h++)for(var m=0;m<60;m+=15){var t=String(h).padStart(2,'0')+':'+String(m).padStart(2,'0');o+='<option value="'+t+'">'+t+'</option>';}return'<select id="'+id+'" onchange="recalc(\''+id[0]+'\')" style="width:100%;padding:6px 8px;border:1px solid #ccc;border-radius:6px;font-size:13px;">'+o+'</select>';}
+
+function buildDias(p,cid){
+  var minM=getMinMonday(),c=document.getElementById(cid);c.innerHTML='';
+  for(var i=0;i<DIAS;i++){
+    var lbl=p==='p'?'Día '+(i+1)+' planificado':'Día '+(i+1)+' solicitado';
+    c.innerHTML+='<div class="dia-card"><div class="dia-title">'+lbl+'</div><div class="dia-body"><div><label>Fecha</label><input type="date" id="'+p+'f'+i+'" min="'+minM+'" onchange="onFecha(\''+p+'\','+i+')" style="width:100%;box-sizing:border-box;padding:6px 8px;border:1px solid #ccc;border-radius:6px;font-size:13px;"/><div id="'+p+'fe'+i+'" style="display:none;margin-top:4px;padding:4px 8px;background:#fef2f2;border:1px solid #fca5a5;border-radius:5px;font-size:11px;color:#b91c1c;"></div></div><div><label>Entrada</label>'+timeOpts(p+'e'+i)+'</div><div><label>Salida</label>'+timeOpts(p+'s'+i)+'<div id="'+p+'nd'+i+'" style="display:none;font-size:11px;color:#6366f1;margin-top:4px;">⟳ Día siguiente</div></div></div></div>';
+  }
+  for(var i=0;i<DIAS;i++){(function(pi,ii){document.getElementById(pi+'e'+ii).addEventListener('change',function(){updND(pi,ii);recalc(pi);});document.getElementById(pi+'s'+ii).addEventListener('change',function(){updND(pi,ii);recalc(pi);});})(p,i);}
+}
+function updND(p,i){var e=document.getElementById(p+'e'+i).value,s=document.getElementById(p+'s'+i).value;document.getElementById(p+'nd'+i).style.display=(e&&s&&toMin(s)<=toMin(e))?'block':'none';}
+function calcTot(p){var t=0;for(var i=0;i<DIAS;i++){var f=document.getElementById(p+'f'+i)&&document.getElementById(p+'f'+i).value,e=document.getElementById(p+'e'+i)&&document.getElementById(p+'e'+i).value,s=document.getElementById(p+'s'+i)&&document.getElementById(p+'s'+i).value;if(f&&e&&s)t+=durMin(e,s);}return t;}
+
+function respDescanso(v){descansoRespuesta=v;document.getElementById('btn_si').style.opacity=v?'1':'0.4';document.getElementById('btn_no').style.opacity=!v?'1':'0.4';document.getElementById('descanso_no_msg').style.display=v?'none':'block';}
+
+function recalc(p){
+  document.getElementById('tot_'+p).textContent=fmtH(calcTot(p));
+  if(p==='s'){
+    var tp=calcTot('p'),ts=calcTot('s'),diff=Math.abs(tp-ts);
+    var errEl=document.getElementById('hrs_err'),descEl=document.getElementById('hrs_descanso');
+    descansoRespuesta=null;
+    document.getElementById('descanso_no_msg').style.display='none';
+    document.getElementById('btn_si').style.opacity='1';
+    document.getElementById('btn_no').style.opacity='1';
+    if(ts===0&&tp===0){errEl.style.display='none';descEl.style.display='none';}
+    else if(diff>=30&&diff<=75){errEl.style.display='none';descEl.style.display='block';}
+    else if(ts!==tp){descEl.style.display='none';errEl.style.display='block';errEl.textContent='⚠ Las horas solicitadas ('+fmtH(ts)+') no coinciden con las planificadas ('+fmtH(tp)+'). Corrígelas para poder enviar.';}
+    else{errEl.style.display='none';descEl.style.display='none';}
+  }
+}
+
+function goS4(){var filled=false;for(var i=0;i<DIAS;i++){if(document.getElementById('pf'+i)&&document.getElementById('pf'+i).value){filled=true;break;}}if(!filled){showErr('e_plan','Introduce la fecha de al menos un día planificado');return;}var ok=true;for(var i=0;i<DIAS;i++){if(document.getElementById('pf'+i)&&document.getElementById('pf'+i).value&&!valFecha('p',i))ok=false;}if(!ok){showErr('e_plan','Corrige los errores de fecha');return;}showErr('e_plan','');buildDias('s','dc_s');go(4);}
+
+async function enviar(){
+  var filled=false;for(var i=0;i<DIAS;i++){if(document.getElementById('sf'+i)&&document.getElementById('sf'+i).value){filled=true;break;}}
+  if(!filled){showErr('e_sol','Introduce la fecha de al menos un día solicitado');return;}
+  var ok=true;for(var i=0;i<DIAS;i++){if(document.getElementById('sf'+i)&&document.getElementById('sf'+i).value&&!valFecha('s',i))ok=false;}
+  if(!ok){showErr('e_sol','Corrige los errores de fecha');return;}
+  showErr('e_sol','');
+  var tp=calcTot('p'),ts=calcTot('s'),diff=Math.abs(tp-ts);
+  if(diff>=30&&diff<=75){
+    if(descansoRespuesta===null){document.getElementById('hrs_descanso').style.display='block';return;}
+    if(descansoRespuesta===false){document.getElementById('descanso_no_msg').style.display='block';return;}
+  } else if(ts!==tp){
+    document.getElementById('hrs_err').style.display='block';
+    document.getElementById('hrs_err').textContent='⚠ Las horas solicitadas ('+fmtH(ts)+') no coinciden con las planificadas ('+fmtH(tp)+').';
+    return;
+  }
+  function getData(p){var r=[];for(var i=0;i<DIAS;i++){var f=document.getElementById(p+'f'+i)&&document.getElementById(p+'f'+i).value,e=document.getElementById(p+'e'+i)&&document.getElementById(p+'e'+i).value,s=document.getElementById(p+'s'+i)&&document.getElementById(p+'s'+i).value;if(f&&e&&s)r.push({fecha:isoToDMY(f),entrada:e,salida:s,duracion:fmtH(durMin(e,s))});}return r;}
+  var now=new Date();
+  var sol={ts:now.getTime(),fechaSolicitud:now.toLocaleDateString('es-ES'),horaSolicitud:now.toLocaleTimeString('es-ES',{hour:'2-digit',minute:'2-digit'}),
+    solicitante:{apellidos:document.getElementById('ap').value.trim(),nombre:document.getElementById('nom').value.trim(),numEmp:document.getElementById('num').value.trim(),colectivo:LBL[document.getElementById('col').value]},
+    companero:{apellidos:document.getElementById('cap').value.trim(),nombre:document.getElementById('cnom').value.trim(),numEmp:document.getElementById('cnum').value.trim(),colectivo:LBL[document.getElementById('ccol').value]},
+    planificado:getData('p'),solicitado:getData('s'),
+    totalPlanificado:fmtH(tp),totalSolicitado:fmtH(ts),
+    descansoConfirmado:descansoRespuesta===true?'Sí':descansoRespuesta===false?'No':'N/A'};
+
+  // Guardar en Firebase
+  var btnEnviar=document.querySelector('#s4 .btn:last-child');
+  btnEnviar.textContent='Enviando...';btnEnviar.disabled=true;
+  var ok2=await window._fbSave(sol);
+  btnEnviar.textContent='Enviar solicitud ↗';btnEnviar.disabled=false;
+  if(!ok2){alert('Error al guardar la solicitud. Comprueba tu conexión a internet.');return;}
+
+  document.getElementById('r_nom').textContent=sol.solicitante.apellidos+', '+sol.solicitante.nombre;
+  document.getElementById('r_num').textContent='Nº '+sol.solicitante.numEmp+' · '+sol.solicitante.colectivo;
+  document.getElementById('r_cnom').textContent=sol.companero.apellidos+', '+sol.companero.nombre;
+  document.getElementById('r_cnum').textContent='Nº '+sol.companero.numEmp+' · '+sol.companero.colectivo;
+  document.getElementById('r_fechahora').textContent='Enviada el '+sol.fechaSolicitud+' a las '+sol.horaSolicitud;
+  function fillR(cid,items){var c=document.getElementById(cid);c.innerHTML='';items.forEach(function(d){var div=document.createElement('div');div.style.cssText='font-size:12px;padding:6px 8px;background:#f9fafb;border-radius:6px;';div.innerHTML='<strong>'+d.fecha+'</strong><br><span style="color:#555;">'+d.entrada+' – '+d.salida+' · '+d.duracion+'</span>';c.appendChild(div);});}
+  fillR('r_plan',sol.planificado);fillR('r_sol',sol.solicitado);
+  document.getElementById('r_tot_p').textContent=sol.totalPlanificado;
+  document.getElementById('r_tot_s').textContent=sol.totalSolicitado;
+  go(5);
+}
+
+function nuevaSolicitud(){
+  ['ap','nom','num','col','cap','cnom','cnum','ccol'].forEach(function(id){var el=document.getElementById(id);if(el){el.value='';el.style.borderColor='';}});
+  ['e_ap','e_nom','e_num','e_col','e_cap','e_cnom','e_cnum','e_ccol'].forEach(function(id){var el=document.getElementById(id);if(el)el.style.display='none';});
+  ['dc_p','dc_s'].forEach(function(id){var el=document.getElementById(id);if(el)el.innerHTML='';});
+  document.getElementById('tot_p').textContent='0h';document.getElementById('tot_s').textContent='0h';
+  document.getElementById('hrs_err').style.display='none';document.getElementById('hrs_descanso').style.display='none';
+  document.getElementById('e_plan').style.display='none';document.getElementById('e_sol').style.display='none';
+  descansoRespuesta=null;go(1);
+}
+
+function toggleLogin(){var b=document.getElementById('loginBox');b.style.display=b.style.display==='none'?'block':'none';document.getElementById('loginErr').style.display='none';document.getElementById('adminPass').value='';}
+function loginAdmin(){if(document.getElementById('adminPass').value===ADMIN_PASS){document.getElementById('loginBox').style.display='none';abrirAdmin();}else document.getElementById('loginErr').style.display='block';}
+
+function getSemana(sol){var f=(sol.planificado||[])[0];if(f&&f.fecha)return getMonDMY(f.fecha);return null;}
+function emparejar(items){
+  var used=new Set(),pairs=[],singles=[];
+  for(var i=0;i<items.length;i++){if(used.has(i))continue;var a=items[i],semA=getSemana(a),matched=false;
+    for(var j=i+1;j<items.length;j++){if(used.has(j))continue;var b=items[j],semB=getSemana(b);
+      if(a.solicitante&&b.solicitante&&a.companero&&b.companero&&a.solicitante.numEmp===b.companero.numEmp&&b.solicitante.numEmp===a.companero.numEmp&&semA&&semB&&semA===semB){used.add(i);used.add(j);pairs.push({a:a,b:b,sem:semA});matched=true;break;}}
+    if(!matched){used.add(i);singles.push({s:a,sem:getSemana(a)});}}
+  pairs.sort(function(x,y){return(x.sem||'').localeCompare(y.sem||'');});
+  singles.sort(function(x,y){return(x.sem||'').localeCompare(y.sem||'');});
+  return{pairs:pairs,singles:singles};
+}
+
+function abrirAdmin(){
+  var ov=document.getElementById('adminOv');
+  if(!ov){ov=document.createElement('div');ov.id='adminOv';ov.style.cssText='position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.55);z-index:9999;overflow-y:auto;';
+    ov.innerHTML='<div style="max-width:1100px;margin:2rem auto;background:#fff;border-radius:12px;padding:1.5rem;">'
+      +'<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.25rem;">'
+      +'<div><p style="font-size:16px;font-weight:700;margin:0;">Panel de administración</p><p style="font-size:12px;color:#666;margin:0;">Solicitudes de cambio de turno</p></div>'
+      +'<div style="display:flex;gap:8px;">'
+      +'<button onclick="dlXLS()" style="padding:8px 16px;background:#15803d;color:#fff;border:none;border-radius:6px;cursor:pointer;font-size:13px;">⬇ Descargar Excel</button>'
+      +'<button onclick="borrarTodo()" style="padding:8px 16px;background:#b91c1c;color:#fff;border:none;border-radius:6px;cursor:pointer;font-size:13px;">🗑 Borrar todo</button>'
+      +'<button onclick="document.getElementById(\'adminOv\').style.display=\'none\'" style="padding:8px 16px;background:#fff;color:#111;border:1px solid #ccc;border-radius:6px;cursor:pointer;font-size:13px;">✕ Cerrar</button>'
+      +'</div></div><div id="adminC"><p style="text-align:center;color:#888;padding:2rem;">Cargando...</p></div></div>';
+    document.body.appendChild(ov);}
+  ov.style.display='block';
+  renderAdmin();
+}
+
+async function renderAdmin(){
+  var c=document.getElementById('adminC');
+  var items=await window._fbLoad();
+  if(!items.length){c.innerHTML='<p style="font-size:13px;color:#888;text-align:center;padding:2rem;">No hay solicitudes registradas.</p>';return;}
+  var ep=emparejar(items),pairs=ep.pairs,singles=ep.singles;
+  var pairBgs=['#f3f4f6','#ffffff'];
+  var HEADS=['Semana','Fecha solicitud','Hora','Solicitante','Nº Emp.','Colectivo','Compañero','Nº Comp.','Colectivo Comp.','Planificado','Solicitado','Descanso'];
+  var th=function(s){return'<th style="background:#111;color:#fff;padding:9px 10px;text-align:left;white-space:nowrap;font-size:12px;border:1px solid #333;">'+s+'</th>';};
+  var td=function(v,bg){return'<td style="background:'+bg+';padding:7px 10px;border:1px solid #ddd;font-size:12px;vertical-align:top;">'+String(v==null?'':v)+'</td>';};
+  function fila(s,bg,sem){
+    var sol=(s.solicitante&&s.solicitante.apellidos?s.solicitante.apellidos:'')+', '+(s.solicitante&&s.solicitante.nombre?s.solicitante.nombre:'');
+    var comp=(s.companero&&s.companero.apellidos?s.companero.apellidos:'')+', '+(s.companero&&s.companero.nombre?s.companero.nombre:'');
+    var plan=(s.planificado||[]).map(function(d){return d.fecha+' '+d.entrada+'-'+d.salida;}).join('<br>');
+    var soli=(s.solicitado||[]).map(function(d){return d.fecha+' '+d.entrada+'-'+d.salida;}).join('<br>');
+    if(!plan)plan=s.totalPlanificado||'';if(!soli)soli=s.totalSolicitado||'';
+    return'<tr>'+td(isoToDMYDisplay(sem),bg)+td(s.fechaSolicitud||'',bg)+td(s.horaSolicitud||'',bg)+td(sol,bg)+td((s.solicitante&&s.solicitante.numEmp)||'',bg)+td((s.solicitante&&s.solicitante.colectivo)||'',bg)+td(comp,bg)+td((s.companero&&s.companero.numEmp)||'',bg)+td((s.companero&&s.companero.colectivo)||'',bg)+td(plan,bg)+td(soli,bg)+td(s.descansoConfirmado||'',bg)+'</tr>';
+  }
+  var rows='';
+  pairs.forEach(function(p,idx){var bg=pairBgs[idx%2];rows+=fila(p.a,bg,p.sem);rows+=fila(p.b,bg,p.sem);});
+  singles.forEach(function(x){rows+=fila(x.s,'#fff1f2',x.sem);});
+  var res='<div style="display:flex;gap:20px;margin-bottom:1rem;font-size:12px;"><span>✅ Emparejadas: <strong>'+(pairs.length*2)+'</strong></span><span style="color:#b91c1c;">⏳ Pendientes: <strong>'+singles.length+'</strong></span></div>';
+  c.innerHTML=res+'<div style="overflow-x:auto;"><table style="width:100%;border-collapse:collapse;"><thead><tr>'+HEADS.map(th).join('')+'</tr></thead><tbody>'+rows+'</tbody></table></div>';
+}
+
+async function borrarTodo(){
+  if(!confirm('¿Seguro que quieres borrar TODAS las solicitudes?'))return;
+  await window._fbDeleteAll();
+  renderAdmin();
+}
+
+function dlXLS(){
+  window._fbLoad().then(function(items){
+    if(!items.length){alert('No hay solicitudes.');return;}
+    var ep=emparejar(items),pairs=ep.pairs,singles=ep.singles;
+    var pairBgs=['#f3f4f6','#fefce8'];
+    var HEADS=['Semana','Fecha solicitud','Hora','Solicitante','Nº Empleado','Colectivo','Compañero','Nº Compañero','Colectivo Compañero','Planificado','Solicitado','Descanso'];
+    var th=function(s){return'<th style="background:#111;color:#fff;padding:8px 10px;text-align:left;border:1px solid #555;font-size:12px;">'+s+'</th>';};
+    var td=function(v,bg){return'<td style="background:'+bg+';padding:7px 10px;border:1px solid #ddd;font-size:12px;vertical-align:top;white-space:pre-wrap;">'+String(v==null?'':v)+'</td>';};
+    function fila(s,bg,sem){
+      var sol=(s.solicitante&&s.solicitante.apellidos?s.solicitante.apellidos:'')+', '+(s.solicitante&&s.solicitante.nombre?s.solicitante.nombre:'');
+      var comp=(s.companero&&s.companero.apellidos?s.companero.apellidos:'')+', '+(s.companero&&s.companero.nombre?s.companero.nombre:'');
+      var plan=(s.planificado||[]).map(function(d){return d.fecha+' '+d.entrada+'-'+d.salida;}).join('\n');
+      var soli=(s.solicitado||[]).map(function(d){return d.fecha+' '+d.entrada+'-'+d.salida;}).join('\n');
+      if(!plan)plan=s.totalPlanificado||'';if(!soli)soli=s.totalSolicitado||'';
+      var vals=[isoToDMYDisplay(sem),s.fechaSolicitud||'',s.horaSolicitud||'',sol,(s.solicitante&&s.solicitante.numEmp)||'',(s.solicitante&&s.solicitante.colectivo)||'',comp,(s.companero&&s.companero.numEmp)||'',(s.companero&&s.companero.colectivo)||'',plan,soli,s.descansoConfirmado||''];
+      return'<tr>'+vals.map(function(v){return td(v,bg);}).join('')+'</tr>';
+    }
+    var rows='';
+    pairs.forEach(function(p,idx){var bg=pairBgs[idx%2];rows+=fila(p.a,bg,p.sem);rows+=fila(p.b,bg,p.sem);});
+    singles.forEach(function(x){rows+=fila(x.s,'#fff1f2',x.sem);});
+    var html='<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40"><head><meta charset="UTF-8"><!--[if gte mso 9]><xml><x:ExcelWorkbook><x:ExcelWorksheets><x:ExcelWorksheet><x:Name>Solicitudes</x:Name><x:WorksheetOptions><x:DisplayGridlines/></x:WorksheetOptions></x:ExcelWorksheet></x:ExcelWorksheets></x:ExcelWorkbook></xml><![endif]--></head><body><table border="1" style="border-collapse:collapse;font-family:Arial;font-size:12px;"><thead><tr>'+HEADS.map(th).join('')+'</tr></thead><tbody>'+rows+'</tbody></table></body></html>';
+    var a=document.createElement('a');a.href='data:application/vnd.ms-excel;charset=utf-8,\uFEFF'+encodeURIComponent(html);a.download='solicitudes_'+new Date().toISOString().split('T')[0]+'.xls';document.body.appendChild(a);a.click();document.body.removeChild(a);
+  });
+}
+</script>
+</body>
+</html>
