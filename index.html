@@ -197,13 +197,12 @@ window._fbDeleteAll = async function() {
   }
 };
 
-window._fbLoadConfig = async function() {
+window._fbVerifyAdmin = async function(password) {
   try {
     const snap = await getDoc(doc(db, 'config', 'admin'));
-    if (snap.exists()) return snap.data();
-    return null;
+    if (snap.exists()) return snap.data().password === password;
+    return false;
   } catch(e) {
-    console.error('Error cargando config:', e);
     return null;
   }
 };
@@ -228,7 +227,6 @@ window._fbLoadEmpleados = async function() {
 
 <script>
 const DIAS=5;
-var ADMIN_PASS='';
 var descansoRespuesta=null;
 var DB = {};
 var DB_LISTO = false;
@@ -262,20 +260,13 @@ function _initDB() {
   }
   var timeout = new Promise(function(_, reject){setTimeout(function(){reject(new Error('timeout'));}, 6000);});
   Promise.race([
-    Promise.all([window._fbLoadEmpleados(), window._fbLoadConfig()]),
+    window._fbLoadEmpleados(),
     timeout
-  ]).then(function(results) {
-    var empData = results[0];
-    var cfgData = results[1];
+  ]).then(function(empData) {
     if (empData && Object.keys(empData).length > 0) {
       DB = empData;
     } else {
       console.warn('Firebase: colección empleados vacía o inaccesible.');
-    }
-    if (cfgData && cfgData.password) {
-      ADMIN_PASS = cfgData.password;
-    } else {
-      console.warn('Firebase: no se encontró config/admin/password.');
     }
   }).catch(function(err) {
     console.error('Error o timeout en carga inicial:', err);
@@ -421,7 +412,18 @@ function limpiarFiltroAdmin(){
 }
 
 function toggleLogin(){var b=document.getElementById('loginBox');b.style.display=b.style.display==='none'?'block':'none';document.getElementById('loginErr').style.display='none';document.getElementById('adminPass').value='';}
-function loginAdmin(){if(document.getElementById('adminPass').value===ADMIN_PASS){document.getElementById('loginBox').style.display='none';abrirAdmin();}else document.getElementById('loginErr').style.display='block';}
+async function loginAdmin(){
+  var entered=document.getElementById('adminPass').value;
+  var errEl=document.getElementById('loginErr');
+  var btn=document.querySelector('#loginBox button[onclick]');
+  if(!entered){errEl.style.display='block';errEl.textContent='⚠ Introduce la contraseña';return;}
+  btn.textContent='…';btn.disabled=true;errEl.style.display='none';
+  var ok=await window._fbVerifyAdmin(entered);
+  btn.textContent='Entrar';btn.disabled=false;
+  if(ok===true){document.getElementById('loginBox').style.display='none';abrirAdmin();}
+  else if(ok===false){errEl.style.display='block';errEl.textContent='⚠ Contraseña incorrecta';}
+  else{errEl.style.display='block';errEl.textContent='⚠ Error de conexión. Inténtalo de nuevo.';}
+}
 
 
 function parseFechaSol(str){
