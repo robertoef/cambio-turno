@@ -152,7 +152,7 @@ h2{font-size:15px;font-weight:600;margin-bottom:4px;}
 <!-- Firebase SDK -->
 <script type="module">
 import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
-import { getFirestore, collection, addDoc, getDocs, deleteDoc, doc } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
+import { getFirestore, collection, addDoc, getDocs, deleteDoc, doc, getDoc } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
 
 const firebaseConfig = {
   apiKey: "AIzaSyChbA9kROGGHC_I8QKCm2tTk0u80P__lwA",
@@ -197,6 +197,17 @@ window._fbDeleteAll = async function() {
   }
 };
 
+window._fbLoadConfig = async function() {
+  try {
+    const snap = await getDoc(doc(db, 'config', 'admin'));
+    if (snap.exists()) return snap.data();
+    return null;
+  } catch(e) {
+    console.error('Error cargando config:', e);
+    return null;
+  }
+};
+
 window._fbLoadEmpleados = async function() {
   try {
     const snap = await getDocs(collection(db, 'empleados'));
@@ -216,7 +227,8 @@ window._fbLoadEmpleados = async function() {
 </script>
 
 <script>
-const DIAS=5, ADMIN_PASS='RRHH2026';
+const DIAS=5;
+var ADMIN_PASS='';
 var descansoRespuesta=null;
 var DB = {};
 var DB_LISTO = false;
@@ -248,17 +260,27 @@ function _initDB() {
     setTimeout(_initDB, 100);
     return;
   }
-  window._fbLoadEmpleados().then(function(data) {
-    if (data && Object.keys(data).length > 0) {
-      DB = data;
+  Promise.all([
+    window._fbLoadEmpleados(),
+    window._fbLoadConfig()
+  ]).then(function(results) {
+    var empData = results[0];
+    var cfgData = results[1];
+    if (empData && Object.keys(empData).length > 0) {
+      DB = empData;
     } else {
       console.warn('Firebase: colección empleados vacía o inaccesible.');
+    }
+    if (cfgData && cfgData.password) {
+      ADMIN_PASS = cfgData.password;
+    } else {
+      console.warn('Firebase: no se encontró config/admin/password.');
     }
     DB_LISTO = true;
     var ov = document.getElementById('loadingOv');
     if (ov) ov.remove();
   }).catch(function(err) {
-    console.error('Error cargando empleados:', err);
+    console.error('Error en la carga inicial:', err);
     DB_LISTO = true;
     var ov = document.getElementById('loadingOv');
     if (ov) ov.remove();
