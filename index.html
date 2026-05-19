@@ -197,10 +197,16 @@ window._fbDeleteAll = async function() {
   }
 };
 
+async function _sha256(str) {
+  const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(str));
+  return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2,'0')).join('');
+}
+
 window._fbVerifyAdmin = async function(password) {
   try {
+    const hash = await _sha256(password);
     const snap = await getDoc(doc(db, 'config', 'admin'));
-    if (snap.exists()) return snap.data().password === password;
+    if (snap.exists()) return snap.data().password === hash;
     return false;
   } catch(e) {
     return null;
