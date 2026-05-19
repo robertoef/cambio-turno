@@ -27,7 +27,6 @@ h2{font-size:15px;font-weight:600;margin-bottom:4px;}
 </style>
 </head>
 <body>
-<div style="max-width:540px;margin:1rem auto 0;padding:0 1rem;"><a href="menu.html" style="font-size:12px;color:#888;text-decoration:none;">← Volver al menú</a></div>
 <div class="wrap">
   <div style="text-align:center;margin-bottom:1.5rem;">
     <p style="font-size:11px;letter-spacing:2px;color:#888;text-transform:uppercase;margin-bottom:4px;">Recursos Humanos</p>
@@ -139,9 +138,9 @@ h2{font-size:15px;font-weight:600;margin-bottom:4px;}
   </div>
 </div>
 
-<button onclick="toggleLogin()" style="position:fixed;bottom:20px;right:20px;background:#111;color:#fff;border:none;border-radius:8px;cursor:pointer;font-size:13px;padding:10px 18px;font-weight:500;box-shadow:0 2px 8px rgba(0,0,0,.25);z-index:9000;">⚙ Admin</button>
+<button onclick="toggleLogin()" style="position:fixed;bottom:20px;right:20px;background:#111;color:#fff;border:none;border-radius:8px;cursor:pointer;font-size:13px;padding:10px 18px;font-weight:500;box-shadow:0 2px 8px rgba(0,0,0,.25);z-index:100000;">⚙ Admin</button>
 
-<div id="loginBox" style="display:none;position:fixed;bottom:68px;right:20px;width:280px;padding:1.25rem;background:#fff;border:1px solid #e5e7eb;border-radius:10px;box-shadow:0 4px 16px rgba(0,0,0,.15);z-index:9001;">
+<div id="loginBox" style="display:none;position:fixed;bottom:68px;right:20px;width:280px;padding:1.25rem;background:#fff;border:1px solid #e5e7eb;border-radius:10px;box-shadow:0 4px 16px rgba(0,0,0,.15);z-index:100001;">
   <p style="font-size:14px;font-weight:600;margin-bottom:10px;">Acceso administrador</p>
   <div style="display:flex;gap:8px;">
     <input type="password" id="adminPass" placeholder="Contraseña" style="flex:1;padding:8px 10px;border:1px solid #ccc;border-radius:6px;font-size:13px;" onkeydown="if(event.key==='Enter')loginAdmin()"/>
@@ -261,9 +260,10 @@ function _initDB() {
     setTimeout(_initDB, 100);
     return;
   }
-  Promise.all([
-    window._fbLoadEmpleados(),
-    window._fbLoadConfig()
+  var timeout = new Promise(function(_, reject){setTimeout(function(){reject(new Error('timeout'));}, 6000);});
+  Promise.race([
+    Promise.all([window._fbLoadEmpleados(), window._fbLoadConfig()]),
+    timeout
   ]).then(function(results) {
     var empData = results[0];
     var cfgData = results[1];
@@ -277,11 +277,9 @@ function _initDB() {
     } else {
       console.warn('Firebase: no se encontró config/admin/password.');
     }
-    DB_LISTO = true;
-    var ov = document.getElementById('loadingOv');
-    if (ov) ov.remove();
   }).catch(function(err) {
-    console.error('Error en la carga inicial:', err);
+    console.error('Error o timeout en carga inicial:', err);
+  }).finally(function() {
     DB_LISTO = true;
     var ov = document.getElementById('loadingOv');
     if (ov) ov.remove();
@@ -543,8 +541,7 @@ function dlXLS(){
     var rows='';
     pairs.forEach(function(p,idx){var bg=pairBgs[idx%2];rows+=fila(p.a,bg,p.sem);rows+=fila(p.b,bg,p.sem);});
     singles.forEach(function(x){rows+=fila(x.s,'#fff1f2',x.sem);});
-    var html='<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40"><head><meta charset="UTF-8"><!--[if gte mso 9]><xml><x:ExcelWorkbook><x:ExcelWorksheets><x:ExcelWorksheet><x:Name>Solicitudes</x:Name><x:WorksheetOptions><x:DisplayGridlines/></x:WorksheetOptions></x:ExcelWorksheet></x:ExcelWorksheets></x:ExcelWorkbook></xml><![endif]--></head><body>
-<div style="max-width:540px;margin:1rem auto 0;padding:0 1rem;"><a href="menu.html" style="font-size:12px;color:#888;text-decoration:none;">← Volver al menú</a></div><table border="1" style="border-collapse:collapse;font-family:Arial;font-size:12px;"><thead><tr>'+HEADS.map(th).join('')+'</tr></thead><tbody>'+rows+'</tbody></table></body></html>';
+    var html='<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40"><head><meta charset="UTF-8"><!--[if gte mso 9]><xml><x:ExcelWorkbook><x:ExcelWorksheets><x:ExcelWorksheet><x:Name>Solicitudes</x:Name><x:WorksheetOptions><x:DisplayGridlines/></x:WorksheetOptions></x:ExcelWorksheet></x:ExcelWorksheets></x:ExcelWorkbook></xml><![endif]--></head><body><table border="1" style="border-collapse:collapse;font-family:Arial;font-size:12px;"><thead><tr>'+HEADS.map(th).join('')+'</tr></thead><tbody>'+rows+'</tbody></table></body></html>';
     var a=document.createElement('a');a.href='data:application/vnd.ms-excel;charset=utf-8,\uFEFF'+encodeURIComponent(html);var sufijo=(desde||hasta)?'_'+( desde||'inicio')+'_al_'+(hasta||'hoy'):'';
     a.download='solicitudes'+sufijo+'_'+new Date().toISOString().split('T')[0]+'.xls';document.body.appendChild(a);a.click();document.body.removeChild(a);
   });
