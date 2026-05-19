@@ -407,9 +407,38 @@ function nuevaSolicitud(){
   descansoRespuesta=null;go(1);
 }
 
+function limpiarFiltroAdmin(){
+  var d=document.getElementById('filtroDesde');
+  var h=document.getElementById('filtroHasta');
+  if(d)d.value='';
+  if(h)h.value='';
+  renderAdmin();
+}
+
 function toggleLogin(){var b=document.getElementById('loginBox');b.style.display=b.style.display==='none'?'block':'none';document.getElementById('loginErr').style.display='none';document.getElementById('adminPass').value='';}
 function loginAdmin(){if(document.getElementById('adminPass').value===ADMIN_PASS){document.getElementById('loginBox').style.display='none';abrirAdmin();}else document.getElementById('loginErr').style.display='block';}
 
+
+function parseFechaSol(str){
+  // Convierte "19/05/2026" a Date
+  if(!str)return null;
+  var p=str.split('/');
+  if(p.length!==3)return null;
+  return new Date(parseInt(p[2]),parseInt(p[1])-1,parseInt(p[0]));
+}
+function filtrarPorFecha(items,desde,hasta){
+  if(!desde&&!hasta)return items;
+  var d=desde?new Date(desde):null;
+  var h=hasta?new Date(hasta):null;
+  if(h)h.setHours(23,59,59,999);
+  return items.filter(function(s){
+    var f=parseFechaSol(s.fechaSolicitud);
+    if(!f)return true;
+    if(d&&f<d)return false;
+    if(h&&f>h)return false;
+    return true;
+  });
+}
 function getSemana(sol){var f=(sol.planificado||[])[0];if(f&&f.fecha)return getMonDMY(f.fecha);return null;}
 function emparejar(items){
   var used=new Set(),pairs=[],singles=[];
@@ -432,7 +461,14 @@ function abrirAdmin(){
       +'<button onclick="dlXLS()" style="padding:8px 16px;background:#15803d;color:#fff;border:none;border-radius:6px;cursor:pointer;font-size:13px;">⬇ Descargar Excel</button>'
       +'<button onclick="borrarTodo()" style="padding:8px 16px;background:#b91c1c;color:#fff;border:none;border-radius:6px;cursor:pointer;font-size:13px;">🗑 Borrar todo</button>'
       +'<button onclick="document.getElementById(\'adminOv\').style.display=\'none\'" style="padding:8px 16px;background:#fff;color:#111;border:1px solid #ccc;border-radius:6px;cursor:pointer;font-size:13px;">✕ Cerrar</button>'
-      +'</div></div><div id="adminC"><p style="text-align:center;color:#888;padding:2rem;">Cargando...</p></div></div>';
+      +'</div></div>'
+      +'<div style="display:flex;align-items:flex-end;gap:12px;margin-bottom:1.25rem;padding:12px 14px;background:#f9fafb;border:1px solid #e5e7eb;border-radius:8px;flex-wrap:wrap;">'
+      +'<div><label style="display:block;font-size:11px;color:#555;margin-bottom:4px;">Fecha solicitud desde</label><input type="date" id="filtroDesde" onchange="renderAdmin()" style="padding:6px 10px;border:1px solid #ccc;border-radius:6px;font-size:13px;"/></div>'
+      +'<div><label style="display:block;font-size:11px;color:#555;margin-bottom:4px;">Fecha solicitud hasta</label><input type="date" id="filtroHasta" onchange="renderAdmin()" style="padding:6px 10px;border:1px solid #ccc;border-radius:6px;font-size:13px;"/></div>'
+      +'<button onclick="limpiarFiltroAdmin()" style="padding:6px 14px;background:#fff;border:1px solid #ccc;border-radius:6px;cursor:pointer;font-size:12px;color:#555;">✕ Limpiar filtro</button>'
+      +'<span id="filtroInfo" style="font-size:12px;color:#0369a1;align-self:center;"></span>'
+      +'</div>'
+      +'<div id="adminC"><p style="text-align:center;color:#888;padding:2rem;">Cargando...</p></div></div>';
     document.body.appendChild(ov);}
   ov.style.display='block';
   renderAdmin();
@@ -440,8 +476,17 @@ function abrirAdmin(){
 
 async function renderAdmin(){
   var c=document.getElementById('adminC');
-  var items=await window._fbLoad();
-  if(!items.length){c.innerHTML='<p style="font-size:13px;color:#888;text-align:center;padding:2rem;">No hay solicitudes registradas.</p>';return;}
+  c.innerHTML='<p style="text-align:center;color:#888;padding:2rem;">Cargando...</p>';
+  var todos=await window._fbLoad();
+  var desde=document.getElementById('filtroDesde')&&document.getElementById('filtroDesde').value;
+  var hasta=document.getElementById('filtroHasta')&&document.getElementById('filtroHasta').value;
+  var items=filtrarPorFecha(todos,desde,hasta);
+  var info=document.getElementById('filtroInfo');
+  if(info){
+    if(desde||hasta){info.textContent='Mostrando '+items.length+' de '+todos.length+' solicitudes';}
+    else{info.textContent='';}
+  }
+  if(!items.length){c.innerHTML='<p style="font-size:13px;color:#888;text-align:center;padding:2rem;">'+(desde||hasta?'No hay solicitudes en ese rango de fechas.':'No hay solicitudes registradas.')+'</p>';return;}
   var ep=emparejar(items),pairs=ep.pairs,singles=ep.singles;
   var pairBgs=['#f3f4f6','#ffffff'];
   var HEADS=['Semana','Fecha solicitud','Hora','Solicitante','Nº Emp.','Colectivo','Compañero','Nº Comp.','Colectivo Comp.','Planificado','Solicitado','Descanso'];
@@ -469,8 +514,11 @@ async function borrarTodo(){
 }
 
 function dlXLS(){
-  window._fbLoad().then(function(items){
-    if(!items.length){alert('No hay solicitudes.');return;}
+  var desde=document.getElementById('filtroDesde')&&document.getElementById('filtroDesde').value||'';
+  var hasta=document.getElementById('filtroHasta')&&document.getElementById('filtroHasta').value||'';
+  window._fbLoad().then(function(todos){
+    var items=filtrarPorFecha(todos,desde,hasta);
+    if(!items.length){alert('No hay solicitudes'+(desde||hasta?' en ese rango de fechas.':'.'));return;}
     var ep=emparejar(items),pairs=ep.pairs,singles=ep.singles;
     var pairBgs=['#f3f4f6','#fefce8'];
     var HEADS=['Semana','Fecha solicitud','Hora','Solicitante','Nº Empleado','Colectivo','Compañero','Nº Compañero','Colectivo Compañero','Planificado','Solicitado','Descanso'];
@@ -489,7 +537,8 @@ function dlXLS(){
     pairs.forEach(function(p,idx){var bg=pairBgs[idx%2];rows+=fila(p.a,bg,p.sem);rows+=fila(p.b,bg,p.sem);});
     singles.forEach(function(x){rows+=fila(x.s,'#fff1f2',x.sem);});
     var html='<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40"><head><meta charset="UTF-8"><!--[if gte mso 9]><xml><x:ExcelWorkbook><x:ExcelWorksheets><x:ExcelWorksheet><x:Name>Solicitudes</x:Name><x:WorksheetOptions><x:DisplayGridlines/></x:WorksheetOptions></x:ExcelWorksheet></x:ExcelWorksheets></x:ExcelWorkbook></xml><![endif]--></head><body><table border="1" style="border-collapse:collapse;font-family:Arial;font-size:12px;"><thead><tr>'+HEADS.map(th).join('')+'</tr></thead><tbody>'+rows+'</tbody></table></body></html>';
-    var a=document.createElement('a');a.href='data:application/vnd.ms-excel;charset=utf-8,\uFEFF'+encodeURIComponent(html);a.download='solicitudes_'+new Date().toISOString().split('T')[0]+'.xls';document.body.appendChild(a);a.click();document.body.removeChild(a);
+    var a=document.createElement('a');a.href='data:application/vnd.ms-excel;charset=utf-8,\uFEFF'+encodeURIComponent(html);var sufijo=(desde||hasta)?'_'+( desde||'inicio')+'_al_'+(hasta||'hoy'):'';
+    a.download='solicitudes'+sufijo+'_'+new Date().toISOString().split('T')[0]+'.xls';document.body.appendChild(a);a.click();document.body.removeChild(a);
   });
 }
 </script>
