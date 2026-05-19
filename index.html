@@ -37,8 +37,8 @@ h2{font-size:15px;font-weight:600;margin-bottom:4px;}
   <!-- PASO 1 -->
   <div id="s1" class="step active">
     <h2>Tus datos</h2><p class="subtitle">Paso 1 de 4 — Identificación del solicitante</p>
-    <div class="field"><label>Apellidos</label><input type="text" id="ap" placeholder="Primer y segundo apellido"/><div class="errbox" id="e_ap" style="display:none;"></div></div>
-    <div class="field"><label>Nombre</label><input type="text" id="nom" placeholder="Nombre completo"/><div class="errbox" id="e_nom" style="display:none;"></div></div>
+    <div class="field"><label>Apellidos</label><input type="text" id="ap" placeholder="Primer y segundo apellido" oninput="sanNombre(this)" onblur="trimNombre(this)"/><div class="errbox" id="e_ap" style="display:none;"></div></div>
+    <div class="field"><label>Nombre</label><input type="text" id="nom" placeholder="Nombre completo" oninput="sanNombre(this)" onblur="trimNombre(this)"/><div class="errbox" id="e_nom" style="display:none;"></div></div>
     <div class="field"><label>Número de empleado</label><input type="text" id="num" placeholder="Ej: 55526" oninput="chkN('num','e_num','col','e_col')"/><div class="errbox" id="e_num" style="display:none;"></div></div>
     <div class="field"><label>Colectivo</label>
       <select id="col" onchange="chkC('num','col','e_col')">
@@ -55,8 +55,8 @@ h2{font-size:15px;font-weight:600;margin-bottom:4px;}
   <!-- PASO 2 -->
   <div id="s2" class="step">
     <h2>Datos del compañero</h2><p class="subtitle">Paso 2 de 4 — Identificación del compañero</p>
-    <div class="field"><label>Apellidos</label><input type="text" id="cap" placeholder="Primer y segundo apellido"/><div class="errbox" id="e_cap" style="display:none;"></div></div>
-    <div class="field"><label>Nombre</label><input type="text" id="cnom" placeholder="Nombre completo"/><div class="errbox" id="e_cnom" style="display:none;"></div></div>
+    <div class="field"><label>Apellidos</label><input type="text" id="cap" placeholder="Primer y segundo apellido" oninput="sanNombre(this)" onblur="trimNombre(this)"/><div class="errbox" id="e_cap" style="display:none;"></div></div>
+    <div class="field"><label>Nombre</label><input type="text" id="cnom" placeholder="Nombre completo" oninput="sanNombre(this)" onblur="trimNombre(this)"/><div class="errbox" id="e_cnom" style="display:none;"></div></div>
     <div class="field"><label>Número de empleado</label><input type="text" id="cnum" placeholder="Ej: 55526" oninput="chkN('cnum','e_cnum','ccol','e_ccol')"/><div class="errbox" id="e_cnum" style="display:none;"></div></div>
     <div class="field"><label>Colectivo</label>
       <select id="ccol" onchange="chkC('cnum','ccol','e_ccol')">
@@ -405,6 +405,16 @@ function nuevaSolicitud(){
   document.getElementById('hrs_err').style.display='none';document.getElementById('hrs_descanso').style.display='none';
   document.getElementById('e_plan').style.display='none';document.getElementById('e_sol').style.display='none';
   descansoRespuesta=null;go(1);
+}
+
+function sanNombre(el){
+  var pos=el.selectionStart;
+  var val=el.value.replace(/[0-9]/g,'').toUpperCase();
+  el.value=val;
+  try{el.setSelectionRange(pos,pos);}catch(e){}
+}
+function trimNombre(el){
+  el.value=el.value.trim();
 }
 
 function limpiarFiltroAdmin(){
