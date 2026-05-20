@@ -442,10 +442,10 @@ function sanNombre(el){var pos=el.selectionStart;var val=el.value.replace(/[0-9]
 function trimNombre(el){el.value=el.value.trim();}
 
 function toggleLogin(){var b=document.getElementById('loginBox');b.style.display=b.style.display==='none'?'block':'none';document.getElementById('loginErr').style.display='none';document.getElementById('adminPass').value='';}
-function parseFechaSol(str){if(!str)return null;var p=str.split('/');if(p.length!==3)return null;return new Date(parseInt(p[2]),parseInt(p[1])-1,parseInt(p[0]));}
-function filtrarPorFecha(items,desde,hasta){if(!desde&&!hasta)return items;var d=desde?new Date(desde):null,h=hasta?new Date(hasta):null;if(h)h.setHours(23,59,59,999);return items.filter(function(s){var f=parseFechaSol(s.fechaSolicitud);if(!f)return true;if(d&&f<d)return false;if(h&&f>h)return false;return true;});}
-function getDia(sol){var f=(sol.planificado||[])[0];return f?f.fecha:null;}
-function emparejar(items){
+window.parseFechaSol=function(str){if(!str)return null;var p=str.split('/');if(p.length!==3)return null;return new Date(parseInt(p[2]),parseInt(p[1])-1,parseInt(p[0]));}
+window.filtrarPorFecha=function(items,desde,hasta){if(!desde&&!hasta)return items;var d=desde?new Date(desde):null,h=hasta?new Date(hasta):null;if(h)h.setHours(23,59,59,999);return items.filter(function(s){var f=parseFechaSol(s.fechaSolicitud);if(!f)return true;if(d&&f<d)return false;if(h&&f>h)return false;return true;});}
+window.getDia=function(sol){var f=(sol.planificado||[])[0];return f?f.fecha:null;}
+window.emparejar=function(items){
   var used=new Set(),pairs=[],singles=[];
   items.sort(function(a,b){return(a.ts||0)-(b.ts||0);});
   for(var i=0;i<items.length;i++){
@@ -465,7 +465,7 @@ function emparejar(items){
   singles.sort(function(x,y){return(x.dia||'').localeCompare(y.dia||'');});
   return{pairs:pairs,singles:singles};
 }
-function limpiarFiltroAdmin(){var d=document.getElementById('filtroDesde'),h=document.getElementById('filtroHasta');if(d)d.value='';if(h)h.value='';renderAdmin();}
+window.limpiarFiltroAdmin=function(){var d=document.getElementById('filtroDesde'),h=document.getElementById('filtroHasta');if(d)d.value='';if(h)h.value='';renderAdmin();}
 
 (function(){
   var _unlocked=false;
@@ -529,11 +529,11 @@ async function renderAdmin(){
   }
   var desde=document.getElementById('filtroDesde')&&document.getElementById('filtroDesde').value;
   var hasta=document.getElementById('filtroHasta')&&document.getElementById('filtroHasta').value;
-  var items=filtrarPorFecha(todos,desde,hasta);
+  var items=window.filtrarPorFecha(todos,desde,hasta);
   var info=document.getElementById('filtroInfo');
   if(info){if(desde||hasta){info.textContent='Mostrando '+items.length+' de '+todos.length+' solicitudes';}else{info.textContent='';}}
   if(!items.length){c.innerHTML='<p style="font-size:13px;color:#888;text-align:center;padding:2rem;">'+(desde||hasta?'No hay solicitudes en ese rango de fechas.':'No hay solicitudes registradas.')+'</p>';return;}
-  var ep=emparejar(items),pairs=ep.pairs,singles=ep.singles;
+  var ep=window.emparejar(items),pairs=ep.pairs,singles=ep.singles;
   var pairBgs=['#f3f4f6','#ffffff'];
   var HEADS=['Día plan.','Fecha solicitud','Hora','Solicitante','Nº Emp.','Colectivo','Compañero','Nº Comp.','Colectivo Comp.','Planificado','Solicitado','Descanso'];
   var th=function(s){return'<th style="background:#111;color:#fff;padding:9px 10px;text-align:left;white-space:nowrap;font-size:12px;border:1px solid #333;">'+s+'</th>';};
@@ -559,9 +559,9 @@ function dlXLS(){
   var desde=document.getElementById('filtroDesde')&&document.getElementById('filtroDesde').value||'';
   var hasta=document.getElementById('filtroHasta')&&document.getElementById('filtroHasta').value||'';
   window._fbLoadDia().then(function(todos){
-    var items=filtrarPorFecha(todos,desde,hasta);
+    var items=window.filtrarPorFecha(todos,desde,hasta);
     if(!items.length){alert('No hay solicitudes'+(desde||hasta?' en ese rango de fechas.':'.'));return;}
-    var ep=emparejar(items),pairs=ep.pairs,singles=ep.singles;
+    var ep=window.emparejar(items),pairs=ep.pairs,singles=ep.singles;
     var pairBgs=['#f3f4f6','#fefce8'];
     var HEADS=['Día plan.','Fecha solicitud','Hora','Solicitante','Nº Empleado','Colectivo','Compañero','Nº Compañero','Colectivo Compañero','Planificado','Solicitado','Descanso'];
     var th=function(s){return'<th style="background:#111;color:#fff;padding:8px 10px;text-align:left;border:1px solid #555;font-size:12px;">'+s+'</th>';};
