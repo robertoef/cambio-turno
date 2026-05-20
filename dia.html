@@ -434,18 +434,25 @@ function sanNombre(el){var pos=el.selectionStart;var val=el.value.replace(/[0-9]
 function trimNombre(el){el.value=el.value.trim();}
 
 function toggleLogin(){var b=document.getElementById('loginBox');b.style.display=b.style.display==='none'?'block':'none';document.getElementById('loginErr').style.display='none';document.getElementById('adminPass').value='';}
-async function loginAdmin(){
-  var entered=document.getElementById('adminPass').value;
-  var errEl=document.getElementById('loginErr');
-  var btn=document.querySelector('#loginBox button[onclick]');
-  if(!entered){errEl.style.display='block';errEl.textContent='⚠ Introduce la contraseña';return;}
-  btn.textContent='…';btn.disabled=true;errEl.style.display='none';
-  var ok=await window._fbVerifyAdmin(entered);
-  btn.textContent='Entrar';btn.disabled=false;
-  if(ok===true){document.getElementById('loginBox').style.display='none';abrirAdmin();}
-  else if(ok===false){errEl.style.display='block';errEl.textContent='⚠ Contraseña incorrecta';}
-  else{errEl.style.display='block';errEl.textContent='⚠ Error de conexión. Inténtalo de nuevo.';}
-}
+(function(){
+  var _unlocked=false;
+
+  window.loginAdmin=async function(){
+    var entered=document.getElementById('adminPass').value;
+    var errEl=document.getElementById('loginErr');
+    var btn=document.querySelector('#loginBox button[onclick]');
+    if(!entered){errEl.style.display='block';errEl.textContent='⚠ Introduce la contraseña';return;}
+    btn.textContent='…';btn.disabled=true;errEl.style.display='none';
+    var ok=await window._fbVerifyAdmin(entered);
+    btn.textContent='Entrar';btn.disabled=false;
+    if(ok===true){_unlocked=true;document.getElementById('loginBox').style.display='none';_openAdmin();}
+    else if(ok===false){errEl.style.display='block';errEl.textContent='⚠ Contraseña incorrecta';}
+    else{errEl.style.display='block';errEl.textContent='⚠ Error de conexión. Inténtalo de nuevo.';}
+  };
+
+  function _openAdmin(){
+    if(!_unlocked)return;
+    _unlocked=false;
 
 function parseFechaSol(str){if(!str)return null;var p=str.split('/');if(p.length!==3)return null;return new Date(parseInt(p[2]),parseInt(p[1])-1,parseInt(p[0]));}
 function filtrarPorFecha(items,desde,hasta){if(!desde&&!hasta)return items;var d=desde?new Date(desde):null,h=hasta?new Date(hasta):null;if(h)h.setHours(23,59,59,999);return items.filter(function(s){var f=parseFechaSol(s.fechaSolicitud);if(!f)return true;if(d&&f<d)return false;if(h&&f>h)return false;return true;});}
@@ -475,8 +482,7 @@ function emparejar(items){
 
 function limpiarFiltroAdmin(){var d=document.getElementById('filtroDesde'),h=document.getElementById('filtroHasta');if(d)d.value='';if(h)h.value='';renderAdmin();}
 
-function abrirAdmin(){
-  var ov=document.getElementById('adminOv');
+    var ov=document.getElementById('adminOv');
   if(!ov){ov=document.createElement('div');ov.id='adminOv';ov.style.cssText='position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.55);z-index:9999;overflow-y:auto;';
     ov.innerHTML='<div style="max-width:1100px;margin:2rem auto;background:#fff;border-radius:12px;padding:1.5rem;">'
       +'<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.25rem;">'
@@ -495,9 +501,10 @@ function abrirAdmin(){
       +'<div id="adminC"><p style="text-align:center;color:#888;padding:2rem;">Cargando...</p></div></div>';
     document.body.appendChild(ov);
   }
-  ov.style.display='block';
-  renderAdmin();
-}
+    ov.style.display='block';
+    renderAdmin();
+  } // end _openAdmin
+})(); // end closure
 
 async function renderAdmin(){
   var c=document.getElementById('adminC');
