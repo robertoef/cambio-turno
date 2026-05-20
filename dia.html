@@ -465,9 +465,9 @@ window.emparejar=function(items){
   singles.sort(function(x,y){return(x.dia||'').localeCompare(y.dia||'');});
   return{pairs:pairs,singles:singles};
 }
-window.limpiarFiltroAdmin=function(){var d=document.getElementById('filtroDesde'),h=document.getElementById('filtroHasta');if(d)d.value='';if(h)h.value='';renderAdmin();}
+window.limpiarFiltroAdmin=function(){var d=document.getElementById('filtroDesde'),h=document.getElementById('filtroHasta');if(d)d.value='';if(h)h.value='';renderAdmin();};
 
-(function(){
+;(function(){
   var _unlocked=false;
 
   window.loginAdmin=async function(){
