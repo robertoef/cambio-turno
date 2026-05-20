@@ -509,7 +509,16 @@ function limpiarFiltroAdmin(){var d=document.getElementById('filtroDesde'),h=doc
 async function renderAdmin(){
   var c=document.getElementById('adminC');
   c.innerHTML='<p style="text-align:center;color:#888;padding:2rem;">Cargando...</p>';
-  var todos=await window._fbLoadDia();
+  if(typeof window._fbLoadDia!=='function'){
+    c.innerHTML='<p style="color:#b91c1c;text-align:center;padding:2rem;">⚠ Error: Firebase aún no está listo. Cierra el panel y vuelve a intentarlo en unos segundos.</p>';
+    return;
+  }
+  var todos;
+  try{todos=await window._fbLoadDia();}
+  catch(e){
+    c.innerHTML='<p style="color:#b91c1c;text-align:center;padding:2rem;">⚠ Error al cargar datos: '+e.message+'</p>';
+    return;
+  }
   var desde=document.getElementById('filtroDesde')&&document.getElementById('filtroDesde').value;
   var hasta=document.getElementById('filtroHasta')&&document.getElementById('filtroHasta').value;
   var items=filtrarPorFecha(todos,desde,hasta);
