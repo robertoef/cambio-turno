@@ -177,8 +177,14 @@ window._fbSaveDia = async function(sol) {
   catch(e) { console.error('Error guardando:', e); return false; }
 };
 window._fbLoadDia = async function() {
-  try { const snap = await getDocs(collection(db, 'solicitudes_dia')); return snap.docs.map(d => ({ ...d.data(), _id: d.id })); }
-  catch(e) { console.error('Error cargando:', e); return []; }
+  try {
+    const timeout = new Promise((_,reject) => setTimeout(() => reject(new Error('Timeout: Firebase tardó demasiado')), 8000));
+    const snap = await Promise.race([getDocs(collection(db, 'solicitudes_dia')), timeout]);
+    return snap.docs.map(d => ({ ...d.data(), _id: d.id }));
+  } catch(e) {
+    console.error('Error cargando solicitudes_dia:', e);
+    throw e;
+  }
 };
 window._fbDeleteAllDia = async function() {
   try { const snap = await getDocs(collection(db, 'solicitudes_dia')); for (const d of snap.docs) await deleteDoc(doc(db, 'solicitudes_dia', d.id)); return true; }
