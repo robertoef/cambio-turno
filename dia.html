@@ -157,7 +157,7 @@ h2{font-size:15px;font-weight:600;margin-bottom:4px;}
 <!-- Firebase SDK -->
 <script type="module">
 import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
-import { getFirestore, collection, addDoc, getDocs, deleteDoc, doc, getDoc } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
+import { getFirestore, collection, addDoc, getDocs, deleteDoc, doc, getDoc, updateDoc } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
 
 const firebaseConfig = {
   apiKey: "AIzaSyChbA9kROGGHC_I8QKCm2tTk0u80P__lwA",
@@ -191,6 +191,11 @@ window._fbLoadDia = async function() {
 window._fbDeleteAllDia = async function() {
   try { const snap = await getDocs(collection(db, 'solicitudes_dia')); for (const d of snap.docs) await deleteDoc(doc(db, 'solicitudes_dia', d.id)); return true; }
   catch(e) { console.error('Error borrando:', e); return false; }
+};
+
+window._fbSetDenegada = async function(id, val) {
+  try { await updateDoc(doc(db, 'solicitudes_dia', id), { denegada: val }); return true; }
+  catch(e) { console.error('Error denegada:', e); return false; }
 };
 async function _sha256(str) {
   const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(str));
@@ -560,7 +565,7 @@ async function renderAdmin(){
   if(!items.length){ c.innerHTML='<p style="font-size:13px;color:#888;text-align:center;padding:2rem;">'+(desde||hasta?'No hay solicitudes en ese rango de fechas.':'No hay solicitudes registradas.')+'</p>'; return; }
   var ep=emparejar(items), pairs=ep.pairs, singles=ep.singles;
   var pairBgs=['#f3f4f6','#ffffff'];
-  var HEADS=['\u0044\u00eda plan.','Fecha solicitud','Hora','Solicitante','N\u00ba Emp.','Colectivo','Compa\u00f1ero','N\u00ba Comp.','Colectivo Comp.','Planificado','Solicitado','Descanso'];
+  var HEADS=['\u0044\u00eda plan.','Fecha solicitud','Hora','Solicitante','N\u00ba Emp.','Colectivo','Compa\u00f1ero','N\u00ba Comp.','Colectivo Comp.','Planificado','Solicitado','Descanso','Estado'];
   var th=function(s){ return '<th style="background:#111;color:#fff;padding:9px 10px;text-align:left;white-space:nowrap;font-size:12px;border:1px solid #333;">'+s+'</th>'; };
   var td=function(v,bg){ return '<td style="background:'+bg+';padding:7px 10px;border:1px solid #ddd;font-size:12px;vertical-align:top;">'+String(v==null?'':v)+'</td>'; };
   function fila(s,bg,dia){
@@ -569,11 +574,11 @@ async function renderAdmin(){
     var plan=(s.planificado||[]).map(function(d){ return d.fecha+' '+d.entrada+'-'+d.salida; }).join('<br>');
     var soli=(s.solicitado||[]).map(function(d){ return d.fecha+' '+d.entrada+'-'+d.salida; }).join('<br>');
     if(!plan) plan=s.totalPlanificado||''; if(!soli) soli=s.totalSolicitado||'';
-    return '<tr>'+td(dia||'\u2014',bg)+td(s.fechaSolicitud||'',bg)+td(s.horaSolicitud||'',bg)+td(sol,bg)+td((s.solicitante&&s.solicitante.numEmp)||'',bg)+td((s.solicitante&&s.solicitante.colectivo)||'',bg)+td(comp,bg)+td((s.companero&&s.companero.numEmp)||'',bg)+td((s.companero&&s.companero.colectivo)||'',bg)+td(plan,bg)+td(soli,bg)+td(s.descansoConfirmado||'',bg)+'</tr>';
+    return '<tr>'+td(dia||'\u2014',bg)+td(s.fechaSolicitud||'',bg)+td(s.horaSolicitud||'',bg)+td(sol,bg)+td((s.solicitante&&s.solicitante.numEmp)||'',bg)+td((s.solicitante&&s.solicitante.colectivo)||'',bg)+td(comp,bg)+td((s.companero&&s.companero.numEmp)||'',bg)+td((s.companero&&s.companero.colectivo)||'',bg)+td(plan,bg)+td(soli,bg)+td(s.descansoConfirmado||'',bg)+(s.denegada ? td('⛔ <strong style="color:#78350f;">DENEGADA</strong> <button data-id="'+s._id+'" onclick="reactivarSolicitud(this.dataset.id)" style="font-size:10px;color:#666;background:none;border:none;cursor:pointer;text-decoration:underline;">Reactivar</button>','#fef9c3') : td('<button data-id="'+s._id+'" onclick="denegarSolicitud(this.dataset.id)" style="padding:3px 10px;background:#f59e0b;color:#fff;border:none;border-radius:4px;cursor:pointer;font-size:11px;">Denegar</button>',bg))+'</tr>';
   }
   var rows='';
-  pairs.forEach(function(p,idx){ var bg=pairBgs[idx%2]; rows+=fila(p.a,bg,p.dia); rows+=fila(p.b,bg,getDia(p.b)); });
-  singles.forEach(function(x){ rows+=fila(x.s,'#fff1f2',x.dia); });
+  pairs.forEach(function(p,idx){ var bg=(p.a.denegada||p.b.denegada)?'#fef9c3':pairBgs[idx%2]; rows+=fila(p.a,bg,p.dia); rows+=fila(p.b,bg,getDia(p.b)); });
+  singles.forEach(function(x){ rows+=fila(x.s,x.s.denegada?'#fef9c3':'#fff1f2',x.dia); });
   var res='<div style="display:flex;gap:20px;margin-bottom:1rem;font-size:12px;"><span>\u2705 Emparejadas: <strong>'+(pairs.length*2)+'</strong></span><span style="color:#b91c1c;">\u23f3 Pendientes: <strong>'+singles.length+'</strong></span></div>';
   c.innerHTML=res+'<div style="overflow-x:auto;"><table style="width:100%;border-collapse:collapse;"><thead><tr>'+HEADS.map(th).join('')+'</tr></thead><tbody>'+rows+'</tbody></table></div>';
 }
@@ -584,10 +589,30 @@ async function borrarTodo(){
   renderAdmin();
 }
 
+async function denegarSolicitud(id){
+  if(!confirm('¿Marcar como denegada? Si tiene pareja se denegará también automáticamente.')) return;
+  var todos=await window._fbLoadDia();
+  var sol=todos.find(function(s){return s._id===id;});
+  if(!sol){renderAdmin();return;}
+  await window._fbSetDenegada(id,true);
+  var par=todos.find(function(s){
+    return s._id!==id&&s.solicitante&&sol.solicitante&&sol.companero&&s.companero&&
+      s.solicitante.numEmp===sol.companero.numEmp&&s.companero.numEmp===sol.solicitante.numEmp;
+  });
+  if(par) await window._fbSetDenegada(par._id,true);
+  renderAdmin();
+}
+
+async function reactivarSolicitud(id){
+  if(!confirm('¿Reactivar esta solicitud?')) return;
+  await window._fbSetDenegada(id,false);
+  renderAdmin();
+}
+
 function dlXLS(){
   var desde=document.getElementById('filtroDesde')&&document.getElementById('filtroDesde').value||'';
   var hasta=document.getElementById('filtroHasta')&&document.getElementById('filtroHasta').value||'';
-  window._fbLoadDia().then(function(todos){
+  window._fbLoadDia().then(function(todos){ todos=todos.filter(function(s){return !s.denegada;});
     var items=filtrarPorFecha(todos,desde,hasta);
     if(!items.length){ alert('No hay solicitudes'+(desde||hasta?' en ese rango de fechas.':'.')); return; }
     var ep=emparejar(items), pairs=ep.pairs, singles=ep.singles;
@@ -615,6 +640,3 @@ function dlXLS(){
     document.body.appendChild(a); a.click(); document.body.removeChild(a);
   });
 }
-</script>
-</body>
-</html>
