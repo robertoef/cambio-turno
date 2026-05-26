@@ -298,12 +298,10 @@ function valFecha(p,i){
     er.textContent='\u26a0 Solicita con al menos 15 d\u00edas de antelaci\u00f3n (semana desde el '+minD.toLocaleDateString('es-ES')+').';
     el.style.borderColor='#fca5a5';return false;
   }
-  if(p==='p'){
-    var ref=getRefMon(),d=new Date(el.value+'T00:00:00'),dy=d.getDay();
-    d.setDate(d.getDate()+(dy===0?-6:1-dy));
-    var thisM=d.toISOString().split('T')[0];
-    if(ref&&thisM!==ref){er.style.display='block';er.textContent='\u26a0 Todas las fechas deben ser de la misma semana.';el.style.borderColor='#fca5a5';return false;}
-  }
+  var ref=getRefMon(),dv=new Date(el.value+'T00:00:00'),dyv=dv.getDay();
+  dv.setDate(dv.getDate()+(dyv===0?-6:1-dyv));
+  var thisM=dv.toISOString().split('T')[0];
+  if(ref&&thisM!==ref){er.style.display='block';er.textContent='\u26a0 Todas las fechas deben ser de la misma semana.';el.style.borderColor='#fca5a5';return false;}
   er.style.display='none';el.style.borderColor='#86efac';return true;
 }
 function onFecha(p,i){
